@@ -1,0 +1,17 @@
+{
+  "checkpoint_path": "pretrained_policy/model.pth",
+  "command": "bash scripts/finetune_smoke.sh",
+  "ended_at_utc": "2026-05-19T00:30:28Z",
+  "exit_code": 1,
+  "gpu_id": 0,
+  "log_path": "logs/finetune_smoke_20260519T003028Z.log",
+  "max_epochs": 1,
+  "message": "Missing checkpoint: pretrained_policy/model.pth. Run bash scripts/download_assets.sh first.",
+  "mode": "finetune",
+  "num_blocks": 6,
+  "num_envs": 768,
+  "seed": 42,
+  "smoke_test": "1",
+  "started_at_utc": "2026-05-19T00:30:28Z",
+  "status": "missing_asset"
+}

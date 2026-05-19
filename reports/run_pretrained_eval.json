@@ -1,0 +1,14 @@
+{
+  "checkpoint_path": "pretrained_policy/model.pth",
+  "command": "bash scripts/run_pretrained_eval.sh",
+  "ended_at_utc": "2026-05-19T00:29:53Z",
+  "exit_code": 1,
+  "gpu_id": 0,
+  "log_path": "logs/run_pretrained_eval_20260519T002953Z.log",
+  "message": "Missing pretrained policy file: pretrained_policy/config.yaml. Run bash scripts/download_assets.sh first.",
+  "mode": "pretrained_eval",
+  "seed": "",
+  "smoke_test": "1",
+  "started_at_utc": "2026-05-19T00:29:53Z",
+  "status": "missing_asset"
+}

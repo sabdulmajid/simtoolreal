@@ -1,0 +1,211 @@
+---
+title: "Making SimToolReal Reproducible on Blackwell GPUs"
+date: "2026-05-18"
+description: "A technical summary of turning the original Isaac Gym SimToolReal repository into a reproducible, auditable GPU-scaling research workflow."
+tags:
+  - "Robotics"
+  - "Simulation"
+  - "Reproducibility"
+keywords:
+  - "SimToolReal"
+  - "Isaac Gym"
+  - "DexToolBench"
+  - "Blackwell GPU"
+  - "experiment tracking"
+---
+
+# Making SimToolReal Reproducible on Blackwell GPUs
+
+GitHub: [sabdulmajid/simtoolreal](https://github.com/sabdulmajid/simtoolreal)
+
+This project started with a practical research-engineering problem: the cloned SimToolReal repository was designed around the original Isaac Gym Preview 4 stack, but the machine I wanted to use has two NVIDIA RTX PRO 6000 Blackwell GPUs, each with roughly 96 GB of VRAM. Isaac Lab is installed on the machine, but the official SimToolReal codebase appears to target Isaac Gym, Python 3.8, PyTorch-era CUDA assumptions, and a repo-local fork of `rl_games`.
+
+That combination is risky. A modern workstation can have excellent hardware while still being unable to run an older simulator binary stack. Before launching large training runs, I wanted to know exactly what works, what fails, what needs to be installed, and how every future result will be recorded.
+
+The current milestone does not add a new algorithm. It does not port the environment to Isaac Lab. It turns the repository into a disciplined, reproducible research project where every smoke test, dry run, failure, and future training result has structured evidence behind it.
+
+## First Principles
+
+Scaling reinforcement learning experiments is not just a matter of increasing `num_envs`.
+
+For a simulation-heavy robotics project, credible scaling depends on three things. First, the environment must actually launch under the intended simulator stack. Second, the training command must be reproducible, including git commit, seed, checkpoint, CUDA device, and software versions. Third, failures must be preserved as results, not erased from the record.
+
+If a training run fails because `isaacgym` is missing, that is not a random inconvenience. It is a result that tells us the environment is not ready. If a dry-run command targets GPU1 with `CUDA_VISIBLE_DEVICES=1`, that is not performance evidence, but it is still useful evidence that the launch path is constructed safely. The goal of this phase was to separate those categories cleanly.
+
+## What I Built
+
+The work has three layers.
+
+The first layer is a system audit. I added a read-only diagnostic script:
+
+```bash
+python scripts/check_system.py
+```
+
+It prints and saves a structured report to:
+
+```text
+reports/system_check.json
+```
+
+The report captures the OS, Python executable and version, git commit and dirty status, PyTorch version, CUDA availability, torch CUDA architecture list, GPU names and VRAM, `nvidia-smi` output, Isaac Gym import status, Isaac Lab import status, repo-local `rl_games` import status, required repository folders, pretrained policy files, and DexToolBench data availability.
+
+The second layer is a safe reproduction harness. I added wrapper scripts for the standard lifecycle:
+
+```text
+scripts/download_assets.sh
+scripts/run_pretrained_eval.sh
+scripts/run_dextoolbench_eval.sh
+scripts/train_scratch_smoke.sh
+scripts/finetune_smoke.sh
+```
+
+These scripts are intentionally conservative. They create logs and reports, fail early on missing dependencies or assets, avoid GUI paths by default, and use bounded smoke settings instead of silently launching expensive jobs.
+
+The third layer is GPU-scaling discipline. I added independent GPU launch and profiling utilities:
+
+```text
+scripts/launch_train_gpu0.sh
+scripts/launch_train_gpu1.sh
+scripts/sweep_num_envs.sh
+scripts/profile_gpu_scaling.py
+```
+
+The current repo does not have verified true distributed multi-GPU training, so the safe first strategy is one process per GPU, pinned with `CUDA_VISIBLE_DEVICES`. The sweep targets the important environment counts:
+
+```text
+12288
+24576
+49152
+```
+
+Those counts respect the repository constraint that `num_envs` must be divisible by `num_blocks`.
+
+## Experiment Discipline
+
+The most important addition is the experiment ledger.
+
+Every wrapper now writes or contributes to structured result files:
+
+```text
+reports/experiment_runs.jsonl
+reports/experiment_results.csv
+reports/experiment_results.json
+reports/experiment_summary.md
+```
+
+Each recorded row includes the command, git commit, dirty git status, environment name, Python version, torch and CUDA versions, GPU id and name, `num_envs`, seed, scratch versus finetune mode, checkpoint path, start and end time, exit code, log path, peak VRAM, GPU utilization, throughput or FPS if available, and final metric or reward if available.
+
+The aggregator is deliberately simple:
+
+```bash
+python scripts/aggregate_results.py
+```
+
+It reads the JSONL ledger and writes a CSV table, JSON table, and Markdown summary. The summary also includes a "Best Recorded Run" section. If a successful run exists, that section gives the exact command and environment evidence needed to reproduce it. If no successful run exists, the summary says so instead of pretending that a dry run is a result.
+
+This matters because robotics simulation results are easy to overstate. A dry-run scaling command is useful, but it is not throughput. A failed import is a blocker, but it is still evidence. The ledger keeps those distinctions intact.
+
+## Current Validation Results
+
+The system audit runs successfully. On this machine, it reports:
+
+```text
+Python: /pub3/neel/pyenv/bin/python
+Python version: 3.12.3
+PyTorch: 2.9.0+cu128
+CUDA available: true
+CUDA arch list includes: sm_120
+GPUs: 2x NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition
+VRAM: about 97887 MiB per GPU
+```
+
+That is good news for modern PyTorch on Blackwell. It is not yet good news for original SimToolReal, because the original repository depends on Isaac Gym Preview 4.
+
+The same report shows the current blocker:
+
+```text
+isaacgym: ModuleNotFoundError
+isaaclab: ModuleNotFoundError
+omni.isaac.lab: ModuleNotFoundError
+rl_games.torch_runner: ModuleNotFoundError
+```
+
+The smoke scripts behave correctly in this blocked environment:
+
+```text
+download_assets: failed early because tyro is missing
+pretrained eval: failed early because pretrained_policy/config.yaml is missing
+DexToolBench eval: failed early because isaacgym is missing
+scratch smoke: failed early because isaacgym is missing
+finetune smoke: failed early because pretrained_policy/model.pth is missing
+```
+
+Those failures are now recorded in the experiment result table. They are not lost in terminal scrollback.
+
+## GPU Scaling Harness
+
+The GPU scaling scripts have only been validated in dry-run mode so far. That is intentional. Since Isaac Gym is not importable in the active shell, launching real training would not test scaling. It would only reproduce the environment failure.
+
+The dry-run harness successfully generated commands for GPU0 and GPU1. The GPU1 sweep produced dry-run rows for:
+
+```text
+12288 envs
+24576 envs
+49152 envs
+```
+
+The aggregate report records these as `dry_run`, not as successful training. No throughput, peak SimToolReal VRAM, final reward, or steps per second is claimed.
+
+This is the right level of evidence for the current state. The launch discipline exists. Real scaling still depends on fixing the Isaac Gym environment.
+
+## What We Did Not Claim
+
+This milestone is intentionally strict about negative evidence.
+
+I am not claiming that SimToolReal currently works on this machine. I am not claiming that Isaac Gym Preview 4 is compatible with Blackwell. I am not claiming any throughput number. I am not claiming that the repo supports distributed multi-GPU training. I am also not claiming Isaac Lab compatibility.
+
+The current state is narrower and more useful: the repo now has a reproducible audit harness, safe smoke scripts, dry-run GPU scaling tools, structured result aggregation, and clear blocker documentation.
+
+That makes the next step much cleaner. Instead of debugging from an ambiguous shell state, the next milestone can focus on building a Python 3.8 Isaac Gym compatibility environment or container, then rerunning the same smoke tests.
+
+## Why This Matters
+
+Research code often fails in two ways. It can fail technically, because a dependency is missing or a simulator binary is incompatible. It can also fail scientifically, because results are not recorded in a way that someone else can audit.
+
+This milestone addresses the second problem before scaling into the first. Every command now has a place to put evidence. Every failure is labeled. Every future successful run should carry the environment, git state, command, checkpoint, seed, GPU identity, and metric trail needed to reproduce it.
+
+That discipline is especially important for GPU scaling. Larger `num_envs` is not automatically better. The meaningful target is stable environment steps per second, reliable physics, useful checkpoints, and actual task progress per wall-clock hour. Filling VRAM is not the goal. Running credible experiments is.
+
+## Next Step
+
+The correct next milestone is a compatibility environment path for original SimToolReal:
+
+```text
+Python 3.8
+Isaac Gym Preview 4
+repo-local rl_games fork
+tyro and project dependencies
+bounded smoke validation
+```
+
+Once that environment imports `isaacgym` and `rl_games.torch_runner`, the same scripts can be rerun:
+
+```bash
+python scripts/check_system.py
+bash scripts/download_assets.sh
+bash scripts/run_pretrained_eval.sh
+bash scripts/run_dextoolbench_eval.sh
+SMOKE_TEST=1 NUM_ENVS=768 NUM_BLOCKS=6 MAX_EPOCHS=1 bash scripts/train_scratch_smoke.sh
+SMOKE_TEST=1 NUM_ENVS=768 NUM_BLOCKS=6 MAX_EPOCHS=1 bash scripts/finetune_smoke.sh
+```
+
+If Isaac Gym fails on Blackwell, that will become a precise compatibility report with exact logs. If it works, then the repo is ready for real single-GPU smoke training, followed by independent GPU0 and GPU1 scaling sweeps.
+
+## Summary
+
+This phase turned SimToolReal from a cloned research repo into an auditable experiment workflow.
+
+The project now has system diagnostics, safe reproduction scripts, independent GPU launch wrappers, dry-run scaling sweeps, structured JSON/CSV result aggregation, best-run reproduction documentation, and clear blocker tracking. The original training stack is still blocked in the current shell by missing Isaac Gym and related dependencies, but the debugging surface is now clean.
+
+Before asking how far two 96 GB Blackwell GPUs can scale SimToolReal, the repository now asks a better question: can we prove exactly what ran, where it ran, and what happened?

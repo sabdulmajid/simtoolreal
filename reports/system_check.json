@@ -1,0 +1,139 @@
+{
+  "environment": {
+    "CONDA_PREFIX": "",
+    "CUDA_VISIBLE_DEVICES": "",
+    "LD_LIBRARY_PATH": "",
+    "PYTHONPATH": "",
+    "VIRTUAL_ENV": "/pub3/neel/pyenv"
+  },
+  "imports": {
+    "Isaac Gym": {
+      "find_spec": false,
+      "import_ok": false,
+      "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'isaacgym'",
+      "spec_name": "isaacgym"
+    },
+    "Isaac Lab (isaaclab)": {
+      "find_spec": false,
+      "import_ok": false,
+      "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'isaaclab'",
+      "spec_name": "isaaclab"
+    },
+    "Isaac Lab (omni.isaac.lab)": {
+      "find_spec": false,
+      "import_ok": false,
+      "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'omni'",
+      "spec_name": "omni.isaac.lab"
+    },
+    "rl_games package": {
+      "find_spec": false,
+      "import_ok": false,
+      "output": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'rl_games.torch_runner'",
+      "spec_name": "rl_games.torch_runner"
+    }
+  },
+  "nvidia_smi": {
+    "available": true,
+    "gpu_query_returncode": 0,
+    "gpu_query_stderr": "",
+    "gpu_query_stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 1426, 580.142\n1, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 4, 580.142",
+    "gpus": [
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": "97887",
+        "memory_used_mib": "1426",
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition"
+      },
+      {
+        "driver_version": "580.142",
+        "index": "1",
+        "memory_total_mib": "97887",
+        "memory_used_mib": "4",
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition"
+      }
+    ],
+    "summary_returncode": 0,
+    "summary_stderr": "",
+    "summary_stdout": "Mon May 18 20:29:46 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.142                Driver Version: 580.142        CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA RTX PRO 6000 Blac...    Off |   00000000:01:00.0 Off |                  Off |\n| 42%   65C    P1             93W /  300W |    1426MiB /  97887MiB |      7%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n|   1  NVIDIA RTX PRO 6000 Blac...    Off |   00000000:49:00.0 Off |                  Off |\n| 30%   42C    P5             20W /  300W |       4MiB /  97887MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A          593842      C   python                                 1416MiB |\n+-----------------------------------------------------------------------------------------+"
+  },
+  "package_versions": {
+    "hydra": {
+      "import_ok": true,
+      "output": "1.3.2",
+      "version": "1.3.2"
+    },
+    "numpy": {
+      "import_ok": true,
+      "output": "1.26.4",
+      "version": "1.26.4"
+    },
+    "omegaconf": {
+      "import_ok": true,
+      "output": "2.3.0",
+      "version": "2.3.0"
+    }
+  },
+  "repo_artifacts": {
+    "dextoolbench_data_exists": false,
+    "pretrained_policy_files": {
+      "pretrained_policy/config.yaml": false,
+      "pretrained_policy/model.pth": false
+    },
+    "required_dirs": {
+      "assets": true,
+      "deployment": true,
+      "dextoolbench": true,
+      "docs": true,
+      "isaacgymenvs": true,
+      "recorded_data": true,
+      "rl_games": true
+    }
+  },
+  "system": {
+    "git": {
+      "commit": "6809a978753e950913a7588bbeaef07d16f10b56",
+      "dirty": true,
+      "error": null,
+      "status_short": "A  docs/completion_audit.md\nA  docs/current_status.md\nA  docs/experiment_discipline.md\nA  docs/gpu_scaling_plan.md\nA  docs/isaac_lab_migration_plan.md\nA  docs/known_blockers.md\nA  docs/next_steps.md\nA  docs/project_plan.md\nA  docs/reproduction_plan.md\nA  docs/simtoolreal-reproducibility-blackwell.mdx\nA  reports/download_assets.json\nAD reports/experiment_results.csv\nAD reports/experiment_results.json\nAD reports/experiment_runs.jsonl\nAD reports/experiment_summary.md\nA  reports/finetune_smoke.json\nA  reports/gpu_scaling_results.csv\nA  reports/gpu_scaling_results.json\nA  reports/gpu_scaling_summary.md\nA  reports/run_dextoolbench_eval.json\nA  reports/run_pretrained_eval.json\nAD reports/sweep_num_envs_12288_gpu1_20260519T002812Z.json\nAD reports/sweep_num_envs_24576_gpu1_20260519T002814Z.json\nAD reports/sweep_num_envs_49152_gpu1_20260519T002816Z.json\nA  reports/system_check.json\nA  reports/train_scratch_smoke.json\nA  scripts/_common.sh\nAM scripts/aggregate_results.py\nA  scripts/check_system.py\nA  scripts/download_assets.sh\nA  scripts/finetune_smoke.sh\nA  scripts/launch_train_gpu0.sh\nA  scripts/launch_train_gpu1.sh\nAM scripts/profile_gpu_scaling.py\nA  scripts/record_experiment.py\nA  scripts/run_dextoolbench_eval.sh\nA  scripts/run_pretrained_eval.sh\nA  scripts/run_with_metrics.py\nA  scripts/sweep_num_envs.sh\nA  scripts/train_scratch_smoke.sh\n?? simtoolreal_reproduction_gpu_goal.md"
+    },
+    "machine": "x86_64",
+    "os": "Ubuntu 24.04.2 LTS",
+    "platform": "Linux-6.8.0-87-generic-x86_64-with-glibc2.39",
+    "python_executable": "/pub3/neel/pyenv/bin/python",
+    "python_version": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+    "repo_root": "/pub7/neel2/simtoolreal",
+    "timestamp_utc": "2026-05-19T00:29:45Z"
+  },
+  "torch": {
+    "cuda_arch_list": [
+      "sm_70",
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "cuda_available": true,
+    "cuda_device_count": 2,
+    "file": "/pub3/neel/pyenv/lib/python3.12/site-packages/torch/__init__.py",
+    "gpus": [
+      {
+        "compute_capability": "sm_120",
+        "index": 0,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "total_vram_gib": 94.96844482421875
+      },
+      {
+        "compute_capability": "sm_120",
+        "index": 1,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "total_vram_gib": 94.96844482421875
+      }
+    ],
+    "import_ok": true,
+    "torch_cuda_version": "12.8",
+    "version": "2.9.0+cu128"
+  }
+}
