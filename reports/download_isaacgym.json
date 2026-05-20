@@ -1,0 +1,12 @@
+{
+  "archive_path": "/pub7/neel2/external/IsaacGym_Preview_4_Package.tar.gz",
+  "command": "bash scripts/download_isaacgym.sh",
+  "ended_at_utc": "2026-05-20T06:38:19Z",
+  "exit_code": 0,
+  "isaac_gym_root": "/pub7/neel2/external/isaacgym_preview4/isaacgym",
+  "log_path": "logs/download_isaacgym_20260520T063819Z.log",
+  "message": "Isaac Gym Preview 4 is available at /pub7/neel2/external/isaacgym_preview4/isaacgym.",
+  "mode": "isaacgym_download",
+  "started_at_utc": "2026-05-20T06:38:19Z",
+  "status": "success"
+}

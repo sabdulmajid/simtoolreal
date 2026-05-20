@@ -166,6 +166,8 @@ def infer_mode(report: Dict[str, Any], source: str, command: str) -> Optional[st
         return "environment_setup"
     if "validate_compat_env" in source:
         return "environment_validation"
+    if "download_isaacgym" in source:
+        return "isaacgym_download"
     if "pretrained" in source:
         return "pretrained_eval"
     if "dextoolbench" in source:
@@ -199,6 +201,10 @@ def normalize_common(report: Dict[str, Any], source_report_path: Optional[Path])
     merged: Dict[str, Any] = {}
     merged.update(report)
     merged.update({key: value for key, value in metrics.items() if value is not None})
+    if report.get("status") is not None:
+        merged["status"] = report["status"]
+    if report.get("message") is not None:
+        merged["message"] = report["message"]
 
     gpu_id = merged.get("gpu_id")
     if gpu_id in (None, ""):

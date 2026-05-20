@@ -108,6 +108,7 @@ def as_int(value: Any) -> Optional[int]:
 def repair_row(row: Dict[str, Any]) -> Dict[str, Any]:
     command = str(row.get("command") or "")
     source = str(row.get("source") or "")
+    message = str(row.get("message") or "")
     if not row.get("mode"):
         if "finetune" in source or "checkpoint=" in command:
             row["mode"] = "finetune"
@@ -117,6 +118,8 @@ def repair_row(row: Dict[str, Any]) -> Dict[str, Any]:
             row["mode"] = "environment_setup"
         elif "validate_compat_env" in source:
             row["mode"] = "environment_validation"
+        elif "download_isaacgym" in source:
+            row["mode"] = "isaacgym_download"
         elif "pretrained" in source:
             row["mode"] = "pretrained_eval"
         elif "dextoolbench" in source:
@@ -128,6 +131,16 @@ def repair_row(row: Dict[str, Any]) -> Dict[str, Any]:
         num_blocks = as_int(row.get("num_blocks"))
         if num_envs and num_blocks:
             row["sapg_block_size"] = num_envs // num_blocks
+    if row.get("status") == "failed" and (
+        "torch cannot run kernels" in message
+        or "no kernel image" in message
+        or "CUDA kernel fails" in message
+    ):
+        row["status"] = "gpu_runtime_error"
+    if row.get("status") != "success":
+        row["final_metric"] = None
+        row["final_reward"] = None
+        row["final_loss"] = None
     return row
 
 

@@ -28,7 +28,7 @@ NUM_ENVS="${NUM_ENVS:-24576}"
 NUM_BLOCKS="${NUM_BLOCKS:-6}"
 SEED="${SEED:-0}"
 SMOKE_TEST="${SMOKE_TEST:-0}"
-EXPERIMENT_NAME="${EXPERIMENT_NAME:-gpu1_train}"
+EXPERIMENT_NAME="${EXPERIMENT_NAME:-1_gpu1_train}"
 WANDB_ACTIVATE="${WANDB_ACTIVATE:-False}"
 WANDB_ENTITY="${WANDB_ENTITY:-}"
 WANDB_PROJECT="${WANDB_PROJECT:-simtoolreal}"
@@ -59,6 +59,12 @@ ended_at="$(simtoolreal_timestamp)"
 if [[ "${exit_code}" -eq 0 ]]; then
   status="success"
   message="GPU1 training command completed."
+elif grep -Eqi "CUDA error: no kernel image|no kernel image is available for execution" "${log_path}"; then
+  status="gpu_runtime_error"
+  message="GPU1 training reached CUDA execution, but torch cannot run kernels on this GPU. See log."
+elif grep -Eqi "ModuleNotFoundError|No module named" "${log_path}"; then
+  status="dependency_error"
+  message="GPU1 training failed on a missing Python dependency. See log."
 else
   status="failed"
   message="GPU1 training command failed. See log."

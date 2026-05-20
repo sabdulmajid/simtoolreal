@@ -44,8 +44,8 @@ WANDB_ACTIVATE=False NUM_ENVS=24576 scripts/launch_train_gpu1.sh
 Run simultaneous independent jobs:
 
 ```bash
-WANDB_ACTIVATE=False NUM_ENVS=24576 EXPERIMENT_NAME=gpu0_run scripts/launch_train_gpu0.sh
-WANDB_ACTIVATE=False NUM_ENVS=24576 EXPERIMENT_NAME=gpu1_run scripts/launch_train_gpu1.sh
+WANDB_ACTIVATE=False NUM_ENVS=24576 EXPERIMENT_NAME=1_gpu0_run scripts/launch_train_gpu0.sh
+WANDB_ACTIVATE=False NUM_ENVS=24576 EXPERIMENT_NAME=1_gpu1_run scripts/launch_train_gpu1.sh
 ```
 
 Dry-run the sweep:
@@ -67,7 +67,7 @@ Dry-run profile commands:
 python scripts/profile_gpu_scaling.py --gpu-id 0
 ```
 
-Run short profiles only after Isaac Gym imports and a one-env smoke test passes:
+Run short profiles only after `bash scripts/validate_compat_env.sh` passes and a 128-env smoke test runs successfully:
 
 ```bash
 python scripts/profile_gpu_scaling.py --gpu-id 0 --max-epochs 3 --run
@@ -112,5 +112,9 @@ Filling VRAM is not the goal. The useful optimization target is stable environme
 ## Failure Handling
 
 - If 49152 envs fails with OOM, rerun 24576 and 12288 to establish a working ceiling.
-- If all env counts fail before environment creation on Blackwell, stop Isaac Gym scaling work and prioritize the Isaac Lab migration.
+- If all env counts fail before environment creation on Blackwell, stop Isaac Gym scaling work and resolve the Python 3.8 PyTorch/Blackwell compatibility blocker first.
 - If only evaluation works but training fails, capture the exact Isaac Gym/PhysX error and freeze the evaluation environment separately from the training environment.
+
+## Current Status
+
+Do not run real scaling yet. Isaac Gym Preview 4 now imports, but torch 2.4.1+cu124 cannot run CUDA kernels on the installed Blackwell `sm_120` GPUs. The latest validation report is `reports/validate_compat_env.json` with `status: gpu_runtime_error`.

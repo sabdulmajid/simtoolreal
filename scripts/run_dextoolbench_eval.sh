@@ -59,6 +59,12 @@ ended_at="$(simtoolreal_timestamp)"
 if [[ "${exit_code}" -eq 0 ]]; then
   status="success"
   message="DexToolBench evaluation command completed."
+elif grep -Eqi "CUDA error: no kernel image|no kernel image is available for execution" "${log_path}"; then
+  status="gpu_runtime_error"
+  message="DexToolBench evaluation reached CUDA execution, but torch cannot run kernels on the visible GPU. See log."
+elif grep -Eqi "ModuleNotFoundError|No module named" "${log_path}"; then
+  status="dependency_error"
+  message="DexToolBench evaluation failed on a missing Python dependency. See log."
 else
   status="failed"
   message="DexToolBench evaluation command failed. See log."

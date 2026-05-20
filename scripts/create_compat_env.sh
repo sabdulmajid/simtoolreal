@@ -18,8 +18,11 @@ report_path="reports/create_compat_env.json"
 ENV_PATH="${SIMTOOLREAL_ENV_PATH:-/pub7/neel2/conda_envs/simtoolreal-py38}"
 TORCH_VERSION="${SIMTOOLREAL_TORCH_VERSION:-2.4.1}"
 TORCHVISION_VERSION="${SIMTOOLREAL_TORCHVISION_VERSION:-0.19.1}"
-TORCH_INDEX_URL="${SIMTOOLREAL_TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu121}"
+TORCH_INDEX_URL="${SIMTOOLREAL_TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu124}"
+FORCE_TORCH_REINSTALL="${SIMTOOLREAL_FORCE_TORCH_REINSTALL:-0}"
 CONDA_EXE="${CONDA_EXE:-}"
+EXTERNAL_DIR="${SIMTOOLREAL_EXTERNAL_DIR:-$(dirname "${ROOT}")/external}"
+DEFAULT_ISAAC_GYM_ROOT="${EXTERNAL_DIR}/isaacgym_preview4/isaacgym"
 
 find_conda() {
   if [[ -n "${CONDA_EXE}" && -x "${CONDA_EXE}" ]]; then
@@ -66,7 +69,11 @@ fi
 
 PY="${ENV_PATH}/bin/python"
 "${PY}" -m pip install -U pip setuptools wheel
-"${PY}" -m pip install --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}" "torchvision==${TORCHVISION_VERSION}"
+torch_install_args=(--index-url "${TORCH_INDEX_URL}")
+case "${FORCE_TORCH_REINSTALL}" in
+  1|true|True|TRUE|yes|Yes|YES) torch_install_args+=(--force-reinstall) ;;
+esac
+"${PY}" -m pip install "${torch_install_args[@]}" "torch==${TORCH_VERSION}" "torchvision==${TORCHVISION_VERSION}"
 "${PY}" -m pip install \
   tyro \
   hydra-core==1.3.2 \
@@ -83,10 +90,25 @@ PY="${ENV_PATH}/bin/python"
   wandb==0.12.21 \
   opencv-python==4.10.0.84
 
+"${PY}" -m pip install \
+  pytorch3d==0.3.0 \
+  viser \
+  trimesh==3.23.5 \
+  transforms3d \
+  matplotlib \
+  pyopenssl \
+  pyvirtualdisplay \
+  pytorch-kinematics \
+  yourdfpy
+
 "${PY}" -m pip install -e "${ROOT}" --no-deps
 "${PY}" -m pip install -e "${ROOT}/rl_games" --no-deps
 
 isaacgym_status="not_requested"
+if [[ -z "${ISAAC_GYM_ROOT:-}" && -d "${DEFAULT_ISAAC_GYM_ROOT}/python" ]]; then
+  ISAAC_GYM_ROOT="${DEFAULT_ISAAC_GYM_ROOT}"
+fi
+
 if [[ -n "${ISAAC_GYM_ROOT:-}" ]]; then
   if [[ -d "${ISAAC_GYM_ROOT}/python" ]]; then
     "${PY}" -m pip install -e "${ISAAC_GYM_ROOT}/python"
@@ -111,7 +133,7 @@ export LD_LIBRARY_PATH="${ENV_PATH}/lib:${LD_LIBRARY_PATH:-}"
 
 status="success"
 message="Compatibility environment is ready; Isaac Gym status: ${isaacgym_status}."
-write_json_report "${report_path}" "${status}" 0 "${message}" "bash scripts/create_compat_env.sh" "${log_path}" "${started_at}" "$(simtoolreal_timestamp)" "{\"env_path\":\"${ENV_PATH}\",\"torch_version\":\"${TORCH_VERSION}\",\"torch_index_url\":\"${TORCH_INDEX_URL}\",\"isaacgym_status\":\"${isaacgym_status}\"}"
+write_json_report "${report_path}" "${status}" 0 "${message}" "bash scripts/create_compat_env.sh" "${log_path}" "${started_at}" "$(simtoolreal_timestamp)" "{\"env_path\":\"${ENV_PATH}\",\"torch_version\":\"${TORCH_VERSION}\",\"torch_index_url\":\"${TORCH_INDEX_URL}\",\"force_torch_reinstall\":\"${FORCE_TORCH_REINSTALL}\",\"isaacgym_status\":\"${isaacgym_status}\"}"
 trap - EXIT
 
 echo

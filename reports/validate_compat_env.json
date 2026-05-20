@@ -1,12 +1,12 @@
 {
   "command": "bash scripts/validate_compat_env.sh",
-  "ended_at_utc": "2026-05-20T05:53:48Z",
+  "ended_at_utc": "2026-05-20T06:38:33Z",
   "env_path": "/pub7/neel2/conda_envs/simtoolreal-py38",
   "exit_code": 1,
-  "log_path": "logs/validate_compat_env_20260520T055343Z.log",
-  "message": "Compatibility env exists, but at least one required import failed. See log.",
+  "log_path": "logs/validate_compat_env_20260520T063825Z.log",
+  "message": "Torch imports, but a minimal CUDA kernel fails on the visible GPU(s).",
   "probe_exit_code": 1,
-  "started_at_utc": "2026-05-20T05:53:43Z",
-  "status": "dependency_error",
+  "started_at_utc": "2026-05-20T06:38:25Z",
+  "status": "gpu_runtime_error",
   "system_check_exit_code": 0
 }

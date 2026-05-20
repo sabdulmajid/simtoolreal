@@ -17,8 +17,11 @@ This pass audited the repository without changing training logic. The project is
 
 ## Compatibility Blockers
 
-- Isaac Gym Preview 4 is the largest risk on Blackwell. NVIDIA's Blackwell compatibility guide says CUDA binaries without PTX need to be rebuilt for Blackwell, and a NVIDIA forum report states Isaac Gym Preview 4's `libPhysXGpu_64.so` has kernels only up to SM_80 and no embedded PTX. This must be verified locally in the actual Python 3.8 Isaac Gym environment before spending time on scaling.
-- PyTorch Blackwell support starts in modern CUDA 12.8 builds; PyTorch 2.7 introduced CUDA 12.8 wheels with Blackwell support. That conflicts with the repo's historical Python 3.8 + cu118 assumptions and needs an explicit compatibility experiment.
+- Isaac Gym Preview 4 now installs and imports in the Python 3.8 compatibility environment. The remaining local blocker is not an import error.
+- The validated Python 3.8 environment uses torch 2.4.1+cu124. It advertises CUDA kernels only through `sm_90`, while both installed GPUs are Blackwell `sm_120`.
+- `scripts/validate_compat_env.sh` proves the blocker with a minimal CUDA operation: `RuntimeError: CUDA error: no kernel image is available for execution on the device`.
+- Pretrained evaluation, DexToolBench evaluation, scratch smoke, and finetune smoke all reach CUDA execution and fail with the same kernel-image error. Do not start GPU scaling until this validation passes.
+- Isaac Gym Preview 4's Python package declares `python_requires='>=3.6,<3.9'` and ships Python 3.8 bindings. Modern Blackwell-capable PyTorch wheels are not available for this Python 3.8 path in the tested package indexes, so the conflict is structural.
 - Isaac Lab import was not available in the current shell environment. Do not claim Isaac Lab compatibility until a separate Isaac Lab environment imports and runs a minimal task.
 - True multi-GPU training is not verified. The SimToolReal launcher forces `multi_gpu=False`, and the vendored distributed path contains `cuda:0` assumptions.
 
@@ -30,12 +33,13 @@ References: [NVIDIA CUDA 12.8 SM_120 support](https://docs.nvidia.com/cuda/archi
 
 - Run `scripts/check_system.py` in the current shell and in every candidate training environment.
 - Record `python --version`, `torch.__version__`, `torch.version.cuda`, `torch.cuda.get_arch_list()`, GPU names, VRAM, and package import status.
-- Add a one-env Isaac Gym smoke test only after Isaac Gym imports.
+- Require `bash scripts/validate_compat_env.sh` to pass before any expensive run. On this machine it currently fails with `gpu_runtime_error`.
 
 ### Phase 1: Pretrained Evaluation
 
 - Create the documented Isaac Gym environment.
 - Download pretrained policy.
+- Verify torch can run CUDA kernels on the visible GPU.
 - Run one interactive DexToolBench task with `CUDA_VISIBLE_DEVICES=0`.
 - Run one numerical `dextoolbench/eval.py` task before running all tasks.
 

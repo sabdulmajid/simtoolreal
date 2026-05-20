@@ -1,18 +1,19 @@
 {
   "checkpoint_path": "pretrained_policy/model.pth",
-  "command": "bash scripts/finetune_smoke.sh",
-  "ended_at_utc": "2026-05-20T05:56:38Z",
+  "command": "CUDA_VISIBLE_DEVICES=0 python -m isaacgymenvs.train ++task.env.useSparseReward=False headless=True task.env.numEnvs=768 train.params.config.minibatch_size=98304 multi_gpu=False train.params.config.good_reset_boundary=0 task.env.goodResetBoundary=0 train.params.config.use_others_experience=lf train.params.config.off_policy_ratio=1.0 train.params.config.expl_type=mixed_expl_learn_param train.params.config.expl_reward_type=entropy train.params.config.expl_coef_block_size=128 train.params.config.expl_reward_coef_scale=0.005 train.params.network.space.continuous.fixed_sigma=coef_cond wandb_activate=False experiment=1_smoke_finetune_768 hydra.run.dir=./train_dir/smoke/finetune_768_20260520T063948Z task=SimToolRealLSTMAsymmetric task.env.objectScaleNoiseMultiplierRange=\\[0.9\\,1.1\\] task.env.forceConsecutiveNearGoalSteps=True task.env.forceScale=20 task.env.torqueScale=2.0 task.env.objectAngVelPenaltyScale=0.0 train.params.config.max_epochs=1 train.params.config.save_frequency=0 seed=42 checkpoint=pretrained_policy/model.pth ",
+  "ended_at_utc": "2026-05-20T06:40:04Z",
   "exit_code": 1,
   "gpu_id": 0,
-  "log_path": "logs/finetune_smoke_20260520T055638Z.log",
+  "log_path": "logs/finetune_smoke_20260520T063948Z.log",
   "max_epochs": 1,
-  "message": "Missing dependency: isaacgym. Run bash scripts/create_compat_env.sh with ISAAC_GYM_ROOT pointing at Isaac Gym Preview 4, then rerun through scripts/run_in_compat_env.sh.",
+  "message": "Finetune smoke reached CUDA execution, but torch cannot run kernels on the visible GPU. See log.",
+  "metrics_path": "reports/metrics/finetune_smoke_20260520T063948Z.json",
   "mode": "finetune",
   "num_blocks": 6,
   "num_envs": 768,
   "sapg_block_size": 128,
   "seed": 42,
   "smoke_test": "1",
-  "started_at_utc": "2026-05-20T05:56:38Z",
-  "status": "dependency_error"
+  "started_at_utc": "2026-05-20T06:39:48Z",
+  "status": "gpu_runtime_error"
 }

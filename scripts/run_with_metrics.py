@@ -209,6 +209,10 @@ def main() -> int:
         if sample.get("gpu_util_percent") is not None
     ]
     parsed = parse_log_metrics(log_path)
+    if exit_code != 0:
+        parsed["final_metric"] = None
+        parsed["final_reward"] = None
+        parsed["final_loss"] = None
     payload: Dict[str, Any] = {
         "status": "timeout" if timed_out else ("success" if exit_code == 0 else "failed"),
         "exit_code": exit_code,

@@ -1,14 +1,16 @@
 # Known Blockers
 
-## 1. Isaac Gym Preview 4 Is Not Installed
+## 1. Python 3.8 PyTorch Does Not Run CUDA Kernels On Blackwell
 
 Evidence:
 
 - `reports/system_check.json`
 - `reports/validate_compat_env.json`
-- `logs/validate_compat_env_20260520T055343Z.log`
-- `logs/run_pretrained_eval_20260520T055638Z.log`
-- `logs/train_scratch_smoke_20260520T055638Z.log`
+- `logs/validate_compat_env_20260520T063825Z.log`
+- `logs/run_pretrained_eval_20260520T063847Z.log`
+- `logs/run_dextoolbench_eval_20260520T063906Z.log`
+- `logs/train_scratch_smoke_20260520T063928Z.log`
+- `logs/finetune_smoke_20260520T063948Z.log`
 
 Failing command:
 
@@ -19,54 +21,69 @@ bash scripts/validate_compat_env.sh
 Error summary:
 
 ```text
-ModuleNotFoundError: No module named 'isaacgym'
+RuntimeError: CUDA error: no kernel image is available for execution on the device
 ```
 
 Current classification:
 
-- Missing dependency: yes.
-- Python version mismatch: mostly fixed. The compatibility env is Python 3.8.20.
-- PyTorch/CUDA mismatch: possible remaining blocker, see below.
-- Isaac Gym install issue: yes.
-- Blackwell GPU compatibility issue: not yet proven for Isaac Gym because the package is absent.
+- Missing dependency: no for the smoke path that reaches CUDA; Isaac Gym and the local runtime imports now work.
+- Python version mismatch: structural risk. Isaac Gym Preview 4 requires Python `<3.9`.
+- PyTorch/CUDA mismatch: yes.
+- Isaac Gym install issue: fixed. `isaacgym` imports from `/pub7/neel2/external/isaacgym_preview4/isaacgym/python`.
+- Blackwell GPU compatibility issue: yes. The installed GPUs report `sm_120`; torch 2.4.1+cu121 and torch 2.4.1+cu124 advertise only through `sm_90`.
 - Asset/path issue: pretrained policy fixed; DexToolBench data still missing.
-- Hydra/config issue: not reached.
+- Hydra/config issue: one smoke wrapper issue was fixed by making experiment names start with a numeric prefix required by `isaacgymenvs/train.py`.
 - rl_games issue: fixed in the compatibility env.
-- Headless/rendering issue: not reached.
-- Training/runtime issue: not reached.
+- Headless/rendering issue: not the current failure.
+- Training/runtime issue: yes, but caused by torch CUDA kernel incompatibility before training can proceed.
 
-Clean install path:
-
-```bash
-export ISAAC_GYM_ROOT=/path/to/extracted/isaacgym
-bash scripts/create_compat_env.sh
-bash scripts/validate_compat_env.sh
-```
-
-`scripts/create_compat_env.sh` installs Isaac Gym only when `${ISAAC_GYM_ROOT}/python` exists.
-
-## 2. Python 3.8 PyTorch Wheel Does Not Advertise Blackwell `sm_120`
-
-Evidence: `reports/system_check.json`
-
-The Python 3.8 compatibility environment currently has:
+The current Python 3.8 compatibility environment has:
 
 ```text
-torch: 2.4.1+cu121
-torch.version.cuda: 12.1
+Python: 3.8.20
+torch: 2.4.1+cu124
+torch.version.cuda: 12.4
 torch CUDA arch list: sm_50, sm_60, sm_70, sm_75, sm_80, sm_86, sm_90
 GPU capability: sm_120
 ```
 
-PyTorch emits this warning:
+Before/after status:
+
+- Before this pass: missing Isaac Gym stopped all evaluation/training commands before simulator launch.
+- After this pass: Isaac Gym imports, the environment starts loading assets, and all smoke commands fail at CUDA execution with `no kernel image`.
+
+Clean options:
+
+- Use a non-Blackwell GPU for the original Isaac Gym Preview 4 stack.
+- Build or locate a Python 3.8-compatible PyTorch package with Blackwell `sm_120` kernel support, then rerun `bash scripts/validate_compat_env.sh`.
+- Treat original Isaac Gym on Blackwell as blocked and start a scoped Isaac Lab migration under a modern Python/PyTorch stack. Do not claim this as original SimToolReal reproduction.
+
+## 2. Isaac Gym Preview 4 Is Installed, But Only In The Python 3.8 Compatibility Path
+
+Evidence:
+
+- `reports/download_isaacgym.json`
+- `reports/system_check.json`
+- `logs/download_isaacgym_20260520T063819Z.log`
+- `logs/create_compat_env_20260520T063132Z.log`
+
+Current state:
 
 ```text
-NVIDIA RTX PRO 6000 Blackwell ... sm_120 is not compatible with the current PyTorch installation.
+archive_path: /pub7/neel2/external/IsaacGym_Preview_4_Package.tar.gz
+isaac_gym_root: /pub7/neel2/external/isaacgym_preview4/isaacgym
+isaacgym import: OK
+binding: gym_38.so
 ```
 
-This means the environment is good enough to expose imports and dependency state, but may still fail when PyTorch kernels or Isaac Gym GPU physics execute on the Blackwell GPUs. The clean fix is a Python 3.8-compatible torch build with Blackwell support if one is available, or an isolated container/host path with a simulator stack verified against the installed driver.
+Important constraint:
 
-Do not claim training compatibility until a smoke environment actually launches and runs.
+```text
+Isaac Gym Preview 4 setup.py declares python_requires='>=3.6,<3.9'.
+The package contains gym_38.so and rlgpu_38.so bindings for Python 3.8.
+```
+
+A modern Python/PyTorch environment can support Blackwell more easily, but Isaac Gym Preview 4 does not import there. The blocker is now a stack compatibility conflict, not just a missing package.
 
 ## 3. DexToolBench Data Is Missing
 

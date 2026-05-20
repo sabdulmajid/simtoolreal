@@ -156,6 +156,27 @@ def collect_torch_status() -> Dict[str, Any]:
                         "error": "{}: {}".format(type(exc).__name__, exc),
                     }
                 )
+        info["cuda_kernel_smoke"] = []
+        for idx in range(torch.cuda.device_count()):
+            try:
+                with torch.cuda.device(idx):
+                    value = (torch.ones((4,), device="cuda") + 1).sum()
+                    torch.cuda.synchronize()
+                    info["cuda_kernel_smoke"].append(
+                        {
+                            "index": idx,
+                            "ok": True,
+                            "result": float(value.cpu()),
+                        }
+                    )
+            except Exception as exc:
+                info["cuda_kernel_smoke"].append(
+                    {
+                        "index": idx,
+                        "ok": False,
+                        "error": "{}: {}".format(type(exc).__name__, exc),
+                    }
+                )
     return info
 
 
@@ -181,6 +202,13 @@ def print_torch_status(info: Dict[str, Any]) -> None:
                 "GPU {index}: {name}, capability {compute_capability}, "
                 "VRAM {total_vram_gib:.2f} GiB".format(**gpu)
             )
+    if info.get("cuda_kernel_smoke"):
+        print("CUDA kernel smoke:")
+        for result in info["cuda_kernel_smoke"]:
+            if result.get("ok"):
+                print("  GPU {}: OK ({})".format(result.get("index"), result.get("result")))
+            else:
+                print("  GPU {}: FAILED ({})".format(result.get("index"), result.get("error")))
 
 
 def collect_nvidia_smi() -> Dict[str, Any]:
@@ -400,6 +428,15 @@ def collect_compatibility_warnings(report: Dict[str, Any]) -> List[str]:
                 "{} reports {}, but this torch build advertises {}. "
                 "A newer PyTorch/CUDA stack may be required before GPU kernels "
                 "run on this device.".format(name, capability, sorted(arch_list))
+            )
+
+    for result in torch_info.get("cuda_kernel_smoke") or []:
+        if not result.get("ok"):
+            warnings.append(
+                "A minimal torch CUDA operation failed on GPU {}: {}. "
+                "Training and evaluation cannot use this torch build on that GPU.".format(
+                    result.get("index"), result.get("error")
+                )
             )
 
     imports = report.get("imports", {})

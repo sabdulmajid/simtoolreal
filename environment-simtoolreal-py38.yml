@@ -19,3 +19,12 @@ dependencies:
       - wandb==0.12.21
       - opencv-python==4.10.0.84
       - tyro
+      - pytorch3d==0.3.0
+      - viser
+      - trimesh==3.23.5
+      - transforms3d
+      - matplotlib
+      - pyopenssl
+      - pyvirtualdisplay
+      - pytorch-kinematics
+      - yourdfpy

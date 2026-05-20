@@ -66,7 +66,7 @@ def build_command(
         "train.params.config.expl_reward_coef_scale=0.005",
         "train.params.network.space.continuous.fixed_sigma=coef_cond",
         "wandb_activate=False",
-        f"experiment=profile_{experiment}",
+        f"experiment=1_profile_{experiment}",
         f"hydra.run.dir=./train_dir/profile/{experiment}",
         "task=SimToolRealLSTMAsymmetric",
         "task.env.objectScaleNoiseMultiplierRange=[0.9,1.1]",

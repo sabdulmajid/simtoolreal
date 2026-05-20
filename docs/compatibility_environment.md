@@ -24,12 +24,24 @@ The script installs:
 
 - Python 3.8
 - pip, setuptools, wheel
-- torch 2.4.1+cu121 and torchvision 0.19.1+cu121
+- torch 2.4.1+cu124 and torchvision 0.19.1+cu124 by default
 - SimToolReal editable
 - repo-local `rl_games` editable
 - the lightweight wrapper dependencies used by smoke tests and asset download
 
-Isaac Gym is intentionally not bundled. If you have an extracted Isaac Gym Preview 4 package, install it through the same script:
+Isaac Gym is not bundled in Git. Download and extract it outside the repo:
+
+```bash
+bash scripts/download_isaacgym.sh
+```
+
+Default extracted location:
+
+```text
+/pub7/neel2/external/isaacgym_preview4/isaacgym
+```
+
+If you have another extracted Isaac Gym Preview 4 package, install it through the same script:
 
 ```bash
 export ISAAC_GYM_ROOT=/path/to/extracted/isaacgym
@@ -62,28 +74,36 @@ bash scripts/run_in_compat_env.sh bash scripts/train_scratch_smoke.sh
 bash scripts/validate_compat_env.sh
 ```
 
-Current expected status before Isaac Gym installation:
+Current expected status on this Blackwell workstation:
 
 ```text
-status: dependency_error
-reason: ModuleNotFoundError: No module named 'isaacgym'
+status: gpu_runtime_error
+reason: torch imports, Isaac Gym imports, but a minimal CUDA kernel fails on the visible GPU(s)
 ```
 
 Current evidence:
 
+- `reports/download_isaacgym.json`
 - `reports/create_compat_env.json`
 - `reports/validate_compat_env.json`
 - `reports/system_check.json`
-- `logs/create_compat_env_20260520T055316Z.log`
-- `logs/validate_compat_env_20260520T055343Z.log`
+- `logs/download_isaacgym_20260520T063819Z.log`
+- `logs/create_compat_env_20260520T063132Z.log`
+- `logs/validate_compat_env_20260520T063825Z.log`
 
 ## Current Blackwell Warning
 
-The validated Python 3.8 environment sees both GPUs, but torch 2.4.1+cu121 does not advertise `sm_120` support:
+The validated Python 3.8 environment sees both GPUs, but torch 2.4.1+cu124 does not advertise `sm_120` support:
 
 ```text
 torch CUDA arch list: sm_50, sm_60, sm_70, sm_75, sm_80, sm_86, sm_90
 GPU capability: sm_120
 ```
 
-This may require a newer torch/CUDA build or a container with a verified Blackwell-compatible stack. Treat it as an unresolved runtime risk until a real Isaac Gym smoke test runs.
+This is no longer hypothetical. `scripts/validate_compat_env.sh` runs a tiny CUDA operation and it fails with:
+
+```text
+RuntimeError: CUDA error: no kernel image is available for execution on the device
+```
+
+Original Isaac Gym Preview 4 also requires Python `<3.9`, so simply moving to a modern Python/PyTorch wheel breaks the Isaac Gym import path. Treat this as the active blocker until a Python 3.8 torch build with `sm_120` support is found or the project moves to a different simulator stack.

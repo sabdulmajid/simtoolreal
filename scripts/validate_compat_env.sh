@@ -12,6 +12,7 @@ started_at="$(simtoolreal_timestamp)"
 stamp="$(date -u +"%Y%m%dT%H%M%SZ")"
 log_path="logs/validate_compat_env_${stamp}.log"
 report_path="reports/validate_compat_env.json"
+probe_path="$(mktemp)"
 ENV_PATH="${SIMTOOLREAL_ENV_PATH:-/pub7/neel2/conda_envs/simtoolreal-py38}"
 
 {
@@ -33,20 +34,23 @@ export PATH="${ENV_PATH}/bin:${PATH}"
 export LD_LIBRARY_PATH="${ENV_PATH}/lib:${LD_LIBRARY_PATH:-}"
 
 set +e
-bash scripts/run_in_compat_env.sh python - <<'PY' >>"${log_path}" 2>&1
+bash scripts/run_in_compat_env.sh python - "${probe_path}" <<'PY' >>"${log_path}" 2>&1
 import importlib
 import json
-import platform
 import sys
 
+probe_path = sys.argv[1]
 checks = {}
 checks["python"] = {"ok": sys.version_info[:2] == (3, 8), "version": sys.version}
-for name in ["tyro", "torch", "rl_games.torch_runner", "isaacgym"]:
+
+# Isaac Gym must be imported before torch in processes that use both.
+for name in ["isaacgym", "tyro", "torch", "rl_games.torch_runner"]:
     try:
         module = importlib.import_module(name)
         checks[name] = {"ok": True, "file": getattr(module, "__file__", "<namespace>")}
     except Exception as exc:
         checks[name] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
 try:
     import torch
     checks["torch_cuda"] = {
@@ -64,11 +68,30 @@ try:
             for idx in range(torch.cuda.device_count())
         ],
     }
+    kernel_results = []
+    if torch.cuda.is_available():
+        for idx in range(torch.cuda.device_count()):
+            try:
+                with torch.cuda.device(idx):
+                    value = (torch.ones((4,), device="cuda") + 1).sum()
+                    torch.cuda.synchronize()
+                    kernel_results.append({"index": idx, "ok": True, "result": float(value.cpu())})
+            except Exception as exc:
+                kernel_results.append({"index": idx, "ok": False, "error": f"{type(exc).__name__}: {exc}"})
+    checks["torch_cuda_kernel_smoke"] = {
+        "ok": bool(kernel_results) and all(item.get("ok") for item in kernel_results),
+        "results": kernel_results,
+    }
 except Exception as exc:
     checks["torch_cuda"] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+    checks["torch_cuda_kernel_smoke"] = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
 print(json.dumps(checks, indent=2, sort_keys=True))
-missing = [key for key, value in checks.items() if isinstance(value, dict) and not value.get("ok", False)]
-raise SystemExit(0 if not missing else 1)
+with open(probe_path, "w") as handle:
+    json.dump(checks, handle, indent=2, sort_keys=True)
+    handle.write("\n")
+failed = [key for key, value in checks.items() if isinstance(value, dict) and not value.get("ok", False)]
+raise SystemExit(0 if not failed else 1)
 PY
 probe_exit=$?
 
@@ -77,15 +100,43 @@ check_exit=$?
 set -e
 
 ended_at="$(simtoolreal_timestamp)"
+classification="$(python - "${probe_path}" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+try:
+    checks = json.load(open(path))
+except Exception as exc:
+    print("failed|Could not parse compatibility probe output: {}: {}".format(type(exc).__name__, exc))
+    raise SystemExit(0)
+
+import_failures = [
+    name
+    for name in ("python", "isaacgym", "tyro", "torch", "rl_games.torch_runner")
+    if not checks.get(name, {}).get("ok", False)
+]
+kernel = checks.get("torch_cuda_kernel_smoke", {})
+if import_failures:
+    print("dependency_error|Compatibility env exists, but required import(s) failed: {}.".format(", ".join(import_failures)))
+elif not checks.get("torch_cuda", {}).get("ok", False):
+    print("gpu_runtime_error|CUDA is not available to torch in the compatibility env.")
+elif not kernel.get("ok", False):
+    print("gpu_runtime_error|Torch imports, but a minimal CUDA kernel fails on the visible GPU(s).")
+else:
+    print("success|Compatibility env validation passed.")
+PY
+)"
+status="${classification%%|*}"
+message="${classification#*|}"
+
 if [[ "${probe_exit}" -eq 0 && "${check_exit}" -eq 0 ]]; then
   status="success"
   exit_code=0
-  message="Compatibility env validation passed."
 else
-  status="dependency_error"
   exit_code=1
-  message="Compatibility env exists, but at least one required import failed. See log."
 fi
 
 write_json_report "${report_path}" "${status}" "${exit_code}" "${message}" "bash scripts/validate_compat_env.sh" "${log_path}" "${started_at}" "${ended_at}" "{\"env_path\":\"${ENV_PATH}\",\"probe_exit_code\":${probe_exit},\"system_check_exit_code\":${check_exit}}"
+rm -f "${probe_path}"
 exit "${exit_code}"

@@ -38,7 +38,7 @@ for num_envs in "${env_counts[@]}"; do
   cmd=(
     env "CUDA_VISIBLE_DEVICES=${GPU_ID}"
     python isaacgymenvs/launch_training.py
-    --custom-experiment-name "sweep_envs_${num_envs}_gpu${GPU_ID}"
+    --custom-experiment-name "1_sweep_envs_${num_envs}_gpu${GPU_ID}"
     --num-envs "${num_envs}"
     --num-blocks "${NUM_BLOCKS}"
     --seed "${SEED}"

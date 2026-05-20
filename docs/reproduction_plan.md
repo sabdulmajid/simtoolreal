@@ -15,6 +15,7 @@ This writes `reports/system_check.json`.
 Use the checked-in compatibility script:
 
 ```bash
+bash scripts/download_isaacgym.sh
 bash scripts/create_compat_env.sh
 bash scripts/run_in_compat_env.sh python scripts/check_system.py
 ```
@@ -25,7 +26,7 @@ Default environment path:
 /pub7/neel2/conda_envs/simtoolreal-py38
 ```
 
-Install Isaac Gym Preview 4 from an extracted local package:
+The download script stores the NVIDIA Isaac Gym package outside the repository under `/pub7/neel2/external` and writes `reports/download_isaacgym.json`. To use a different extracted package:
 
 ```bash
 export ISAAC_GYM_ROOT=/path/to/extracted/isaacgym
@@ -39,14 +40,15 @@ Current validation in this workspace:
 
 ```text
 Python: 3.8.20
-torch: 2.4.1+cu121
+torch: 2.4.1+cu124
 rl_games.torch_runner: import OK
-isaacgym: ModuleNotFoundError
+isaacgym: import OK
 pretrained_policy/config.yaml: present
 pretrained_policy/model.pth: present
+torch CUDA kernel smoke: failed on sm_120 with "no kernel image"
 ```
 
-Expected pass criteria: `isaacgym` imports, `rl_games.torch_runner` imports, CUDA is available, and torch reports an architecture list compatible with the visible GPU. On Blackwell, this is the first likely failure point.
+Expected pass criteria: `isaacgym` imports, `rl_games.torch_runner` imports, CUDA is available, torch reports an architecture list compatible with the visible GPU, and `scripts/validate_compat_env.sh` can run its CUDA kernel smoke. On this Blackwell machine, the import criteria now pass and the CUDA kernel criterion fails.
 
 ## 2. Download The Pretrained Policy
 
@@ -205,6 +207,8 @@ git status --short | tee train_dir/git_status.txt
 ## Current Evidence From This Shell
 
 - System report: `reports/system_check.json`
+- Isaac Gym download report: `reports/download_isaacgym.json`
+- Compatibility validation report: `reports/validate_compat_env.json`
 - Asset download wrapper report: `reports/download_assets.json`
 - Pretrained eval wrapper report: `reports/run_pretrained_eval.json`
 - DexToolBench eval wrapper report: `reports/run_dextoolbench_eval.json`
@@ -215,7 +219,7 @@ git status --short | tee train_dir/git_status.txt
 - Aggregated result JSON: `reports/experiment_results.json`
 - Best-run summary: `reports/experiment_summary.md`
 
-These reports currently show that the Python 3.8 dependency stack and pretrained checkpoint are in place, but original SimToolReal execution remains blocked by missing Isaac Gym and a possible PyTorch/Blackwell architecture mismatch.
+These reports currently show that the Python 3.8 dependency stack, Isaac Gym Preview 4, repo-local `rl_games`, and pretrained checkpoint are in place. Original SimToolReal execution remains blocked because torch 2.4.1+cu124 does not run CUDA kernels on the installed Blackwell `sm_120` GPUs.
 
 See `docs/experiment_discipline.md` for the exact recorded fields and the
 workflow for reproducing the best recorded run.
