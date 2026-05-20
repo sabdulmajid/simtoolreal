@@ -104,23 +104,33 @@ bash scripts/run_in_compat_env.sh python download_dextoolbench_data.py \
   --task-name swing_down
 ```
 
-## 4. Isaac Lab Is Out Of Scope For The Current Fix
+## 4. Clean Isaac Lab Runtime Works, But Has One Dependency Conflict
 
-Isaac Lab does not import in the Python 3.8 compatibility environment. That does not matter for the original Isaac Gym reproduction path.
+Isaac Lab does not import in the Python 3.8 Isaac Gym compatibility environment. That is expected and does not matter for the original Isaac Gym reproduction path.
 
-The Blackwell path is now partially validated under a modern Python/PyTorch environment:
+The Blackwell path is now validated under a separate modern Python/PyTorch environment:
 
-- `reports/blackwell_isaaclab_smoke.json`
-- `reports/blackwell_isaaclab_validation.json`
-- `reports/blackwell_isaaclab_smoke_gpu1.json`
-- `reports/blackwell_isaaclab_validation_gpu1.json`
+- environment script: `scripts/create_isaaclab_blackwell_env.sh`
+- environment path: `/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell`
+- environment report: `reports/create_isaaclab_blackwell_env.json`
+- GPU0 smoke report: `reports/blackwell_isaaclab_smoke_clean_gpu0.json`
+- GPU0 smoke metrics: `reports/blackwell_isaaclab_validation_clean_gpu0.json`
+- GPU1 smoke report: `reports/blackwell_isaaclab_smoke_clean_gpu1.json`
+- GPU1 smoke metrics: `reports/blackwell_isaaclab_validation_clean_gpu1.json`
+- 12,288-env GPU0 smoke report: `reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json`
+- 12,288-env GPU0 smoke metrics: `reports/blackwell_isaaclab_validation_clean_gpu0_12288.json`
 
 Current status:
 
 - Isaac Lab Cartpole smoke runs on both GPUs.
-- torch 2.10.0+cu128 advertises `sm_120`.
+- torch 2.7.0+cu128 advertises `sm_120` and `compute_120`.
 - a minimal torch CUDA kernel succeeds.
-- `pip check` fails, so the active `isaaclab2` environment is not a clean reproducibility environment.
+- a bounded 12,288-env, 32-step Isaac Lab Cartpole smoke succeeds on GPU0.
+- `pip check` still fails because `fastapi 0.115.7` requires `starlette<0.46.0`, while this Isaac Lab checkout pins `starlette==0.49.1`.
 - `/pub7/neel2/isaaclab_ws/IsaacLab` fails due a missing `apps/isaacsim_5` layout; the working launcher path is `/pub7/neel/vlm/IsaacLab`.
 
 This means the project is not a dead end, but the fix is a clean Isaac Lab path plus a scoped environment port. It is not more Isaac Gym scaling on Blackwell.
+
+## 5. SimToolReal Is Not Yet Ported To Isaac Lab
+
+The passing Isaac Lab reports are runtime compatibility evidence, not SimToolReal task reproduction. The next implementation milestone should port the minimal ToolPose tracking environment only, with parity tests for observations, actions, reset behavior, reward terms, and object/robot state access.

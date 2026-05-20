@@ -1,6 +1,6 @@
 # Blackwell Isaac Lab Path
 
-Last validated from this workspace on 2026-05-20T09:27Z.
+Last validated from this workspace on 2026-05-20T10:17Z.
 
 ## Decision
 
@@ -29,42 +29,61 @@ Original Isaac Gym compatibility path:
   - `reports/train_scratch_smoke.json`
   - `reports/finetune_smoke.json`
 
-Modern Isaac Lab smoke path:
+Clean Isaac Lab smoke path:
 
+- environment script: `scripts/create_isaaclab_blackwell_env.sh`
+- environment path: `/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell`
 - wrapper: `scripts/run_blackwell_isaaclab_smoke.sh`
 - validator: `scripts/validate_blackwell_isaaclab.py`
-- Python: `3.11.14`
-- torch: `2.10.0+cu128`
-- torch CUDA arch list includes `sm_120`
+- Python: `3.11.15`
+- torch: `2.7.0+cu128`
+- torch CUDA arch list includes `sm_120` and `compute_120`
 - Isaac Lab import path: `/pub7/neel/vlm/IsaacLab/source/isaaclab`
-- Isaac Sim import path: `/pub7/neel/miniconda3/envs/isaaclab2/lib/python3.11/site-packages/isaacsim`
+- Isaac Sim import path: `/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell/lib/python3.11/site-packages/isaacsim`
 - task: `Isaac-Cartpole-Direct-v0`
 - smoke size: 16 envs, 16 steps
 
 GPU 0 report:
 
-- report: `reports/blackwell_isaaclab_smoke.json`
-- metrics: `reports/blackwell_isaaclab_validation.json`
+- report: `reports/blackwell_isaaclab_smoke_clean_gpu0.json`
+- metrics: `reports/blackwell_isaaclab_validation_clean_gpu0.json`
 - status: `success_with_dependency_conflicts`
-- throughput: about 1031 FPS
-- peak VRAM: 25392 MiB
-- peak GPU utilization: 48%
+- throughput: about 1134 FPS
+- peak VRAM: 33254 MiB
+- peak GPU utilization: 52%
 
 GPU 1 report:
 
-- report: `reports/blackwell_isaaclab_smoke_gpu1.json`
-- metrics: `reports/blackwell_isaaclab_validation_gpu1.json`
+- report: `reports/blackwell_isaaclab_smoke_clean_gpu1.json`
+- metrics: `reports/blackwell_isaaclab_validation_clean_gpu1.json`
 - status: `success_with_dependency_conflicts`
-- throughput: about 1056 FPS
-- peak VRAM: 24293 MiB
-- peak GPU utilization: 47%
+- throughput: about 841 FPS
+- peak VRAM: 31425 MiB
+- peak GPU utilization: 58%
+
+Bounded scale smoke:
+
+- report: `reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json`
+- metrics: `reports/blackwell_isaaclab_validation_clean_gpu0_12288.json`
+- GPU: 0
+- smoke size: 12,288 envs, 32 steps
+- status: `success_with_dependency_conflicts`
+- throughput: about 798,157 env-steps/sec
+- peak VRAM: 34858 MiB
+- peak GPU utilization: 39%
 
 ## Important Caveats
 
-The current `isaaclab2` environment is not clean. `pip check` reports dependency
-conflicts, including Isaac Sim packages expecting torch `2.7.0` while the active
-environment has torch `2.10.0+cu128`. The bounded smoke test succeeds, but this
-is not yet a production-quality reproducibility environment.
+The clean environment is usable for bounded Isaac Lab runtime validation, but it
+is not fully dependency-clean. `pip check` reports:
+
+```text
+fastapi 0.115.7 has requirement starlette<0.46.0,>=0.40.0, but you have starlette 0.49.1.
+```
+
+This appears to be an upstream packaging conflict between Isaac Sim 5.1's
+FastAPI pin and this Isaac Lab checkout's Starlette pin. The bounded smoke tests
+therefore report `success_with_dependency_conflicts`, not plain `success`.
 
 The `/pub7/neel2/isaaclab_ws/IsaacLab` checkout is not currently the working
 launcher path. Its app launcher expects an `apps/isaacsim_5` experience layout
@@ -83,37 +102,53 @@ checkout unless `ISAACLAB_ROOT` is provided.
 GPU 0:
 
 ```bash
-bash scripts/run_blackwell_isaaclab_smoke.sh
+bash scripts/create_isaaclab_blackwell_env.sh
+ACCEPT_EULA=Y ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
 ```
 
 GPU 1:
 
 ```bash
-GPU_ID=1 \
-REPORT_PATH=reports/blackwell_isaaclab_smoke_gpu1.json \
-METRICS_PATH=reports/blackwell_isaaclab_validation_gpu1.json \
-bash scripts/run_blackwell_isaaclab_smoke.sh
+ACCEPT_EULA=Y GPU_ID=1 ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/blackwell_isaaclab_smoke_clean_gpu1.json \
+  METRICS_PATH=reports/blackwell_isaaclab_validation_clean_gpu1.json \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
+```
+
+Bounded scale smoke:
+
+```bash
+ACCEPT_EULA=Y NUM_ENVS=12288 STEPS=32 \
+  ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json \
+  METRICS_PATH=reports/blackwell_isaaclab_validation_clean_gpu0_12288.json \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
 ```
 
 Override paths when validating a clean environment:
 
 ```bash
-ISAACLAB_CONDA_ENV=isaaclab-clean \
+ACCEPT_EULA=Y \
+ISAACLAB_CONDA_ENV=/path/to/conda-env \
 ISAACLAB_ROOT=/path/to/IsaacLab \
 GPU_ID=0 \
 bash scripts/run_blackwell_isaaclab_smoke.sh
 ```
 
+The script maps `ACCEPT_EULA=Y` to Isaac Sim's required
+`OMNI_KIT_ACCEPT_EULA=Y`. Users are responsible for accepting NVIDIA's EULA.
+
 ## Recommended Fix
 
-Proceed, but stop trying to make Isaac Gym Preview 4 the Blackwell scaling
-backend. The clean next step is:
+Proceed. Isaac Gym Preview 4 should not be the Blackwell scaling backend for
+this machine. The clean next step is:
 
-1. Create a clean Isaac Lab environment with a Blackwell-capable torch build.
-2. Make `pip check` pass or explicitly document the remaining Isaac Sim package
-   pins.
-3. Rerun `scripts/run_blackwell_isaaclab_smoke.sh` on GPU 0 and GPU 1.
-4. Start a scoped Isaac Lab port of the minimal ToolPose tracking environment.
+1. Keep the clean Isaac Lab environment and the dependency-conflict report as
+   the baseline runtime evidence.
+2. Start a scoped Isaac Lab port of the minimal ToolPose tracking environment.
+3. Validate parity against Isaac Gym observations, rewards, reset behavior,
+   action application, and robot/object state tensors before training.
 
 Do not claim SimToolReal reproduction or scaling until the ToolPose environment
 itself has been ported and matched against the Isaac Gym behavior.

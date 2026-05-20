@@ -211,21 +211,35 @@ Python 3.8 torch build with `sm_120` kernels exists. The current forward path is
 to validate Isaac Lab separately before porting the minimal environment:
 
 ```bash
-bash scripts/run_blackwell_isaaclab_smoke.sh
+bash scripts/create_isaaclab_blackwell_env.sh
+ACCEPT_EULA=Y ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
 ```
 
 GPU 1:
 
 ```bash
-GPU_ID=1 \
-REPORT_PATH=reports/blackwell_isaaclab_smoke_gpu1.json \
-METRICS_PATH=reports/blackwell_isaaclab_validation_gpu1.json \
-bash scripts/run_blackwell_isaaclab_smoke.sh
+ACCEPT_EULA=Y GPU_ID=1 ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/blackwell_isaaclab_smoke_clean_gpu1.json \
+  METRICS_PATH=reports/blackwell_isaaclab_validation_clean_gpu1.json \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
 ```
 
-Current result in this workspace: both GPUs complete the bounded Isaac Lab
-Cartpole smoke test, but the active `isaaclab2` environment has dependency
-conflicts, so the result is recorded as `success_with_dependency_conflicts`.
+Bounded 12,288-env runtime smoke:
+
+```bash
+ACCEPT_EULA=Y NUM_ENVS=12288 STEPS=32 \
+  ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json \
+  METRICS_PATH=reports/blackwell_isaaclab_validation_clean_gpu0_12288.json \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
+```
+
+Current result in this workspace: the clean Isaac Lab environment uses Python
+3.11.15 and torch 2.7.0+cu128, advertises `sm_120`, runs a CUDA kernel, runs
+Cartpole on both GPUs, and completes a 12,288-env GPU0 smoke. The result is
+recorded as `success_with_dependency_conflicts` because `pip check` reports the
+known FastAPI/Starlette conflict.
 
 ## Current Evidence From This Shell
 
@@ -243,6 +257,10 @@ conflicts, so the result is recorded as `success_with_dependency_conflicts`.
 - Best-run summary: `reports/experiment_summary.md`
 - Blackwell Isaac Lab GPU0 report: `reports/blackwell_isaaclab_smoke.json`
 - Blackwell Isaac Lab GPU1 report: `reports/blackwell_isaaclab_smoke_gpu1.json`
+- Clean Isaac Lab environment report: `reports/create_isaaclab_blackwell_env.json`
+- Clean Isaac Lab GPU0 report: `reports/blackwell_isaaclab_smoke_clean_gpu0.json`
+- Clean Isaac Lab GPU1 report: `reports/blackwell_isaaclab_smoke_clean_gpu1.json`
+- Clean Isaac Lab 12,288-env report: `reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json`
 
 These reports currently show that the Python 3.8 dependency stack, Isaac Gym Preview 4, repo-local `rl_games`, and pretrained checkpoint are in place. Original SimToolReal execution remains blocked because torch 2.4.1+cu124 does not run CUDA kernels on the installed Blackwell `sm_120` GPUs.
 

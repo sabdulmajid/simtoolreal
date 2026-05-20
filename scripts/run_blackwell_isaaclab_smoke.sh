@@ -16,7 +16,12 @@ metrics_path="${METRICS_PATH:-reports/blackwell_isaaclab_validation.json}"
 log_path="${LOG_PATH:-logs/blackwell_isaaclab_smoke_${timestamp}.log}"
 
 conda_sh="${CONDA_SH:-/pub7/neel/miniconda3/etc/profile.d/conda.sh}"
-conda_env="${ISAACLAB_CONDA_ENV:-isaaclab2}"
+default_clean_env="/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell"
+if [[ -z "${ISAACLAB_CONDA_ENV:-}" && -d "${default_clean_env}" ]]; then
+  conda_env="${default_clean_env}"
+else
+  conda_env="${ISAACLAB_CONDA_ENV:-isaaclab2}"
+fi
 select_isaaclab_root() {
   if [[ -n "${ISAACLAB_ROOT:-}" ]]; then
     echo "${ISAACLAB_ROOT}"
@@ -43,6 +48,10 @@ seed="${SEED:-42}"
 task="${TASK:-Isaac-Cartpole-Direct-v0}"
 
 started_at="$(simtoolreal_timestamp)"
+
+if [[ -n "${ACCEPT_EULA:-}" && -z "${OMNI_KIT_ACCEPT_EULA:-}" ]]; then
+  export OMNI_KIT_ACCEPT_EULA="${ACCEPT_EULA}"
+fi
 
 if [[ ! -f "${conda_sh}" ]]; then
   ended_at="$(simtoolreal_timestamp)"
@@ -104,6 +113,7 @@ cmd=(
   echo "conda_env=${conda_env}"
   echo "isaaclab_root=${isaaclab_root}"
   echo "CUDA_VISIBLE_DEVICES=${gpu_id}"
+  echo "OMNI_KIT_ACCEPT_EULA=${OMNI_KIT_ACCEPT_EULA:-unset}"
   echo "command=$(quote_command "${cmd[@]}")"
   echo
 } >"${log_path}"

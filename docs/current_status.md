@@ -1,6 +1,6 @@
 # Current Status
 
-Last validated from this workspace on 2026-05-20T09:27Z.
+Last validated from this workspace on 2026-05-20T10:17Z.
 
 ## What Works Now
 
@@ -19,8 +19,10 @@ Last validated from this workspace on 2026-05-20T09:27Z.
 - The aggregate summary now refuses to report a "best run" until a measured evaluation, training, or profile run succeeds.
 - Pretrained evaluation, DexToolBench evaluation, scratch smoke, and finetune smoke now reach CUDA execution rather than stopping at missing imports.
 - A bounded Isaac Lab Cartpole smoke test runs on both Blackwell GPUs through `scripts/run_blackwell_isaaclab_smoke.sh`.
-- The modern Isaac Lab smoke path uses Python 3.11.14 and torch 2.10.0+cu128, whose CUDA arch list includes `sm_120`.
-- GPU 0 and GPU 1 each completed a 16-env, 16-step Isaac Lab smoke test with structured reports.
+- `scripts/create_isaaclab_blackwell_env.sh` creates/reuses a clean Blackwell-targeted Isaac Lab environment at `/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell`.
+- The clean Isaac Lab path uses Python 3.11.15, Isaac Sim 5.1, and torch 2.7.0+cu128, whose CUDA arch list includes `sm_120` and `compute_120`.
+- GPU 0 and GPU 1 each completed a 16-env, 16-step Isaac Lab Cartpole smoke test with structured reports.
+- GPU 0 also completed a bounded 12,288-env, 32-step Isaac Lab Cartpole scale smoke.
 
 ## What Is Still Blocked
 
@@ -30,8 +32,9 @@ Last validated from this workspace on 2026-05-20T09:27Z.
 - Isaac Lab does not import in this compatibility environment. That is expected and is not the current target.
 - DexToolBench data is still missing under `dextoolbench/data/`.
 - No real SimToolReal throughput, reward, FPS, peak run VRAM, or largest stable `num_envs` has been measured yet.
-- The current `isaaclab2` environment is not dependency-clean; `pip check` reports conflicts. The Isaac Lab smoke result is therefore recorded as `success_with_dependency_conflicts`, not a clean reproducibility pass.
+- The clean Isaac Lab environment still has one upstream dependency conflict: `fastapi 0.115.7` requires `starlette<0.46.0`, while this Isaac Lab checkout pins `starlette==0.49.1`. Isaac Lab runtime smoke succeeds, but reports are recorded as `success_with_dependency_conflicts`.
 - The `/pub7/neel2/isaaclab_ws/IsaacLab` checkout fails before simulation because its app launcher expects a missing `apps/isaacsim_5` layout. The working smoke path currently uses `/pub7/neel/vlm/IsaacLab`.
+- SimToolReal has not been ported to Isaac Lab yet. The passing Isaac Lab evidence is a Blackwell runtime path, not original SimToolReal reproduction.
 
 ## Current Evidence
 
@@ -52,6 +55,13 @@ Last validated from this workspace on 2026-05-20T09:27Z.
 - Blackwell Isaac Lab GPU0 metrics: `reports/blackwell_isaaclab_validation.json`
 - Blackwell Isaac Lab GPU1 report: `reports/blackwell_isaaclab_smoke_gpu1.json`
 - Blackwell Isaac Lab GPU1 metrics: `reports/blackwell_isaaclab_validation_gpu1.json`
+- Clean Isaac Lab env report: `reports/create_isaaclab_blackwell_env.json`
+- Clean Isaac Lab GPU0 report: `reports/blackwell_isaaclab_smoke_clean_gpu0.json`
+- Clean Isaac Lab GPU0 metrics: `reports/blackwell_isaaclab_validation_clean_gpu0.json`
+- Clean Isaac Lab GPU1 report: `reports/blackwell_isaaclab_smoke_clean_gpu1.json`
+- Clean Isaac Lab GPU1 metrics: `reports/blackwell_isaaclab_validation_clean_gpu1.json`
+- Clean Isaac Lab 12,288-env GPU0 report: `reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json`
+- Clean Isaac Lab 12,288-env GPU0 metrics: `reports/blackwell_isaaclab_validation_clean_gpu0_12288.json`
 - Blackwell Isaac Lab path notes: `docs/blackwell_isaaclab_path.md`
 
 Latest relevant logs:
@@ -66,8 +76,12 @@ Latest relevant logs:
 - `logs/finetune_smoke_20260520T063948Z.log`
 - `logs/blackwell_isaaclab_smoke_20260520T092605Z.log`
 - `logs/blackwell_isaaclab_smoke_20260520T092646Z.log`
+- `logs/create_isaaclab_blackwell_env_20260520T101502Z.log`
+- `logs/blackwell_isaaclab_smoke_clean_gpu0_20260520T101612Z.log`
+- `logs/blackwell_isaaclab_smoke_clean_gpu1_20260520T101643Z.log`
+- `logs/blackwell_isaaclab_smoke_clean_gpu0_12288_20260520T101730Z.log`
 
-## Current Best Command
+## Current Best Original-Stack Command
 
 Use the compatibility environment wrapper:
 
@@ -76,6 +90,30 @@ bash scripts/run_in_compat_env.sh python scripts/check_system.py
 ```
 
 Expected current result: Python 3.8, torch 2.4.1+cu124, Isaac Gym import OK, repo-local `rl_games` import OK, pretrained policy files present, and torch CUDA kernel smoke failed on Blackwell `sm_120`.
+
+## Current Best Blackwell Runtime Commands
+
+```bash
+bash scripts/create_isaaclab_blackwell_env.sh
+ACCEPT_EULA=Y ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
+ACCEPT_EULA=Y GPU_ID=1 ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/blackwell_isaaclab_smoke_clean_gpu1.json \
+  METRICS_PATH=reports/blackwell_isaaclab_validation_clean_gpu1.json \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
+ACCEPT_EULA=Y NUM_ENVS=12288 STEPS=32 ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json \
+  METRICS_PATH=reports/blackwell_isaaclab_validation_clean_gpu0_12288.json \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
+```
+
+Latest clean-env results:
+
+| report | status | num_envs | throughput_fps | peak_vram_mib | peak_gpu_util_percent |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `reports/blackwell_isaaclab_smoke_clean_gpu0.json` | `success_with_dependency_conflicts` | 16 | 1133.56 | 33254 | 52 |
+| `reports/blackwell_isaaclab_smoke_clean_gpu1.json` | `success_with_dependency_conflicts` | 16 | 841.08 | 31425 | 58 |
+| `reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json` | `success_with_dependency_conflicts` | 12288 | 798156.94 | 34858 | 39 |
 
 ## Next Required External Action
 
@@ -87,4 +125,4 @@ Python 3.8 PyTorch wheels available here stop at torch 2.4.1.
 torch 2.4.1+cu121 and torch 2.4.1+cu124 do not advertise sm_120 and fail CUDA kernels on the installed Blackwell GPUs.
 ```
 
-The clean next milestone is no longer more original-stack scaling. Original Isaac Gym on Blackwell remains blocked, while the modern Isaac Lab smoke path works with caveats. Proceed by building a clean Isaac Lab compatibility environment and then porting only the minimal ToolPose tracking environment.
+The clean next milestone is no longer more original-stack scaling. Original Isaac Gym on Blackwell remains blocked, while the clean Isaac Lab Blackwell runtime path works with a documented dependency-conflict caveat. Proceed by porting only the minimal ToolPose tracking environment to Isaac Lab and validating parity against the Isaac Gym implementation.

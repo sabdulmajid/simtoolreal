@@ -1,30 +1,32 @@
 # Experiment Summary
 
-Generated: 2026-05-20T09:29:24Z
+Generated: 2026-05-20T10:23:16Z
 
-Total rows: 49
+Total rows: 60
 
 ## Status Counts
 
 - `dependency_error`: 14
 - `dry_run`: 4
-- `failed`: 7
+- `failed`: 12
 - `gpu_runtime_error`: 12
 - `missing_asset`: 2
 - `success`: 8
-- `success_with_dependency_conflicts`: 2
+- `success_with_dependency_conflicts`: 8
 
 ## Mode Counts
 
 - `asset_download`: 2
-- `blackwell_isaaclab_validation`: 4
+- `blackwell_isaaclab_validation`: 9
 - `dextoolbench_eval`: 5
 - `environment_setup`: 5
 - `environment_validation`: 7
 - `finetune`: 5
 - `isaacgym_download`: 2
+- `isaaclab_environment_setup`: 2
 - `pretrained_eval`: 7
 - `scratch`: 12
+- `unknown`: 4
 
 ## Best Recorded Run
 
@@ -34,8 +36,8 @@ No successful measured evaluation, training, or profile run has been recorded ye
 
 | time | source | status | message | log |
 | --- | --- | --- | --- | --- |
-| 2026-05-20T09:24:50Z | blackwell_isaaclab_smoke_vlm | failed | Blackwell Isaac Lab smoke failed. See log. | logs/blackwell_isaaclab_smoke_vlm_20260520T092450Z.log |
-| 2026-05-20T09:24:05Z | blackwell_isaaclab_smoke | failed | Isaac Lab bounded GPU simulation or torch CUDA smoke failed. | logs/blackwell_isaaclab_smoke_20260520T092403Z.log |
-| 2026-05-20T06:39:51Z | finetune_smoke | gpu_runtime_error | Finetune smoke reached CUDA execution, but torch cannot run kernels on the visible GPU. See log. | logs/finetune_smoke_20260520T063948Z.log |
-| 2026-05-20T06:39:31Z | train_scratch_smoke | gpu_runtime_error | Scratch smoke reached CUDA execution, but torch cannot run kernels on the visible GPU. See log. | logs/train_scratch_smoke_20260520T063928Z.log |
-| 2026-05-20T06:39:10Z | run_dextoolbench_eval | gpu_runtime_error | DexToolBench evaluation reached CUDA execution, but torch cannot run kernels on the visible GPU. See log. | logs/run_dextoolbench_eval_20260520T063906Z.log |
+| 2026-05-20T10:13:41Z | blackwell_isaaclab_smoke_clean_gpu0 | failed | Isaac Lab bounded GPU simulation or torch CUDA smoke failed. | logs/blackwell_isaaclab_smoke_clean_gpu0_20260520T101340Z.log |
+| 2026-05-20T10:13:00Z | blackwell_isaaclab_smoke_clean_gpu0 | failed | Blackwell Isaac Lab smoke failed. See log. | logs/blackwell_isaaclab_smoke_clean_gpu0_20260520T101300Z.log |
+| 2026-05-20T10:06:58Z | create_isaaclab_blackwell_env | failed | Isaac Lab environment setup failed. See log. | logs/create_isaaclab_blackwell_env_20260520T100658Z.log |
+| 2026-05-20T10:05:52Z | create_isaaclab_blackwell_env | failed | Isaac Lab environment setup failed. See log. | logs/create_isaaclab_blackwell_env_20260520T100552Z.log |
+| 2026-05-20T09:34:40Z | create_isaaclab_blackwell_env | failed | Isaac Lab environment setup failed. See log. | logs/create_isaaclab_blackwell_env_20260520T093440Z.log |

@@ -58,8 +58,11 @@ torch 2.4.1+cu121 and torch 2.4.1+cu124 do not advertise sm_120 and fail CUDA ke
 The chosen path is Isaac Lab for Blackwell. The evidence is now:
 
 - original Isaac Gym smoke commands reach CUDA and fail on `sm_120`;
-- Isaac Lab Cartpole smoke runs on GPU 0 and GPU 1 with torch 2.10.0+cu128;
-- the active Isaac Lab environment still has dependency conflicts.
+- the clean Isaac Lab environment uses Python 3.11.15 and torch 2.7.0+cu128;
+- torch advertises `sm_120` and runs a CUDA kernel on Blackwell;
+- Isaac Lab Cartpole smoke runs on GPU 0 and GPU 1;
+- a bounded 12,288-env Isaac Lab Cartpole smoke runs on GPU 0;
+- the clean Isaac Lab environment still has one FastAPI/Starlette dependency conflict.
 
 Do not spend more time scaling the original Isaac Gym stack on this Blackwell
 machine.
@@ -69,27 +72,40 @@ machine.
 Validate GPU 0:
 
 ```bash
-bash scripts/run_blackwell_isaaclab_smoke.sh
+bash scripts/create_isaaclab_blackwell_env.sh
+ACCEPT_EULA=Y ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
 ```
 
 Validate GPU 1:
 
 ```bash
-GPU_ID=1 \
-REPORT_PATH=reports/blackwell_isaaclab_smoke_gpu1.json \
-METRICS_PATH=reports/blackwell_isaaclab_validation_gpu1.json \
-bash scripts/run_blackwell_isaaclab_smoke.sh
+ACCEPT_EULA=Y GPU_ID=1 ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/blackwell_isaaclab_smoke_clean_gpu1.json \
+  METRICS_PATH=reports/blackwell_isaaclab_validation_clean_gpu1.json \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
+```
+
+Validate one bounded scale point:
+
+```bash
+ACCEPT_EULA=Y NUM_ENVS=12288 STEPS=32 \
+  ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json \
+  METRICS_PATH=reports/blackwell_isaaclab_validation_clean_gpu0_12288.json \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
 ```
 
 Expected current result: `success_with_dependency_conflicts`. This means the
-simulator and CUDA smoke worked, but the active environment is not clean enough
-to be the final reproducible environment.
+simulator and CUDA smoke worked, but the environment still has the documented
+FastAPI/Starlette dependency conflict.
 
 ## Next Milestone
 
-Build a clean Isaac Lab compatibility environment, rerun the two smoke commands,
-and only then begin a scoped port of the minimal ToolPose tracking environment.
-Do not port the full repo yet.
+Begin a scoped port of the minimal ToolPose tracking environment to Isaac Lab.
+Do not port the full repo yet. The first port milestone should only cover asset
+loading, reset, observation/action plumbing, reward parity, and a deterministic
+one-step smoke test.
 
 ## If A Blackwell-Capable Python 3.8 Torch Build Is Installed
 

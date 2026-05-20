@@ -1,7 +1,7 @@
 ---
 title: "Making SimToolReal Reproducible on Blackwell GPUs"
 date: "2026-05-20"
-description: "A technical summary of turning the original Isaac Gym SimToolReal repository into a reproducible, auditable GPU-scaling research workflow."
+description: "A technical summary of auditing SimToolReal, proving the original Isaac Gym stack is blocked on Blackwell, and validating a clean Isaac Lab runtime path for the next port."
 tags:
   - "Robotics"
   - "Simulation"
@@ -22,7 +22,7 @@ This project started with a practical research-engineering problem: the cloned S
 
 That combination is risky. A modern workstation can have excellent hardware while still being unable to run an older simulator binary stack. Before launching large training runs, I wanted to know exactly what works, what fails, what needs to be installed, and how every future result will be recorded.
 
-The current milestone does not add a new algorithm. It does not port the environment to Isaac Lab. It turns the repository into a disciplined, reproducible research project where every smoke test, dry run, failure, and future training result has structured evidence behind it.
+The current milestone does not add a new algorithm. It turns the repository into a disciplined, reproducible research project where every smoke test, dry run, failure, and future training result has structured evidence behind it. It also answers the key hardware question: the original Isaac Gym stack is blocked on these Blackwell GPUs, but a clean Isaac Lab runtime path now works and has been measured.
 
 ## First Principles
 
@@ -116,6 +116,28 @@ The current repo does not have verified true distributed multi-GPU training, so 
 
 Those counts respect the repository constraint that `num_envs` must be divisible by `num_blocks`.
 
+The fifth layer is a Blackwell-compatible Isaac Lab runtime path. I added:
+
+```text
+scripts/create_isaaclab_blackwell_env.sh
+scripts/run_blackwell_isaaclab_smoke.sh
+scripts/validate_blackwell_isaaclab.py
+```
+
+The environment script creates or reuses:
+
+```text
+/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell
+```
+
+This environment uses Python 3.11.15, Isaac Sim 5.1, Isaac Lab from `/pub7/neel/vlm/IsaacLab`, and PyTorch 2.7.0+cu128. That torch build advertises:
+
+```text
+sm_75, sm_80, sm_86, sm_90, sm_100, sm_120, compute_120
+```
+
+That is the critical difference from the original Python 3.8 Isaac Gym environment. The clean Isaac Lab path can execute CUDA kernels on Blackwell.
+
 ## Experiment Discipline
 
 The most important addition is the experiment ledger.
@@ -208,13 +230,53 @@ The aggregate report records these as `dry_run`, not as successful training. No 
 
 This is the right level of evidence for the current state. The launch discipline exists. Real scaling still depends on resolving the Python 3.8 PyTorch/Blackwell runtime blocker.
 
+## Blackwell Isaac Lab Runtime Results
+
+The important positive result is that this is not a hardware dead end. The original Isaac Gym path is blocked, but a modern Isaac Lab path is viable.
+
+The clean Isaac Lab environment setup report is:
+
+```text
+reports/create_isaaclab_blackwell_env.json
+```
+
+It confirms:
+
+```text
+Python: 3.11.15
+torch: 2.7.0+cu128
+torch CUDA: 12.8
+torch arch list: includes sm_120 and compute_120
+Isaac Lab import: OK
+Isaac Sim package present: OK
+CUDA kernel smoke: OK
+```
+
+The remaining caveat is one upstream dependency conflict:
+
+```text
+fastapi 0.115.7 requires starlette<0.46.0,>=0.40.0, but Isaac Lab pins starlette==0.49.1
+```
+
+Because of that, the runtime reports are deliberately labeled `success_with_dependency_conflicts` rather than plain success.
+
+The bounded Isaac Lab Cartpole smoke results are:
+
+| Run | GPU | Envs | Steps | Status | Throughput | Peak VRAM | Peak Util |
+|---|---:|---:|---:|---|---:|---:|---:|
+| `blackwell_isaaclab_smoke_clean_gpu0` | 0 | 16 | 16 | `success_with_dependency_conflicts` | 1,133.56 FPS | 33,254 MiB | 52% |
+| `blackwell_isaaclab_smoke_clean_gpu1` | 1 | 16 | 16 | `success_with_dependency_conflicts` | 841.08 FPS | 31,425 MiB | 58% |
+| `blackwell_isaaclab_smoke_clean_gpu0_12288` | 0 | 12,288 | 32 | `success_with_dependency_conflicts` | 798,156.94 env-steps/sec | 34,858 MiB | 39% |
+
+These are not SimToolReal training numbers. They are runtime compatibility numbers proving that Isaac Lab plus torch cu128 can drive the Blackwell GPUs at simulation scale. That gives the project a real path forward: port the minimal ToolPose tracking environment to Isaac Lab, then reproduce the task under the Blackwell-compatible runtime.
+
 ## What We Did Not Claim
 
 This milestone is intentionally strict about negative evidence.
 
-I am not claiming that SimToolReal currently works on this machine. I am not claiming that Isaac Gym Preview 4 plus Python 3.8 PyTorch is compatible with Blackwell. I am not claiming any throughput number. I am not claiming that the repo supports distributed multi-GPU training. I am also not claiming Isaac Lab compatibility.
+I am not claiming that original SimToolReal currently works on this machine. I am not claiming that Isaac Gym Preview 4 plus Python 3.8 PyTorch is compatible with Blackwell. I am not claiming original SimToolReal throughput. I am not claiming that the repo supports distributed multi-GPU training. I am also not claiming that the SimToolReal task has already been ported to Isaac Lab.
 
-The current state is narrower and more useful: the repo now has a reproducible audit harness, an automated Isaac Gym install path, safe smoke scripts, dry-run GPU scaling tools, structured result aggregation, and clear blocker documentation with exact logs.
+The current state is narrower and more useful: the repo now has a reproducible audit harness, an automated Isaac Gym install path, safe smoke scripts, dry-run GPU scaling tools, structured result aggregation, clear blocker documentation with exact logs, and a working Isaac Lab runtime lane for Blackwell.
 
 That makes the next step much cleaner. Instead of debugging from an ambiguous shell state, the next milestone can focus on the real compatibility decision: use non-Blackwell hardware for the original Isaac Gym stack, build or locate a Python 3.8 torch package that supports `sm_120`, or start a scoped Isaac Lab migration under a modern Python/PyTorch stack.
 
@@ -228,7 +290,7 @@ That discipline is especially important for GPU scaling. Larger `num_envs` is no
 
 ## Next Step
 
-The correct next milestone is no longer "install Isaac Gym." That has been done. The next milestone is to resolve the Blackwell runtime incompatibility.
+The correct next milestone is no longer "install Isaac Gym." That has been done. It is also no longer useful to keep scaling the original Isaac Gym path on this Blackwell machine. The evidence says that path is structurally blocked unless a Python 3.8 torch build with `sm_120` kernels appears.
 
 ```bash
 bash scripts/validate_compat_env.sh
@@ -241,7 +303,7 @@ status: gpu_runtime_error
 RuntimeError: CUDA error: no kernel image is available for execution on the device
 ```
 
-If a Blackwell-capable Python 3.8 torch build is installed, the same scripts should be rerun in order:
+If a Blackwell-capable Python 3.8 torch build is installed, the original Isaac Gym scripts should be rerun in order:
 
 ```bash
 bash scripts/run_in_compat_env.sh python scripts/check_system.py
@@ -251,12 +313,24 @@ bash scripts/run_in_compat_env.sh bash scripts/train_scratch_smoke.sh
 bash scripts/run_in_compat_env.sh bash scripts/finetune_smoke.sh
 ```
 
-If those smoke tests pass, then the repo is ready for real single-GPU smoke training, followed by independent GPU0 and GPU1 scaling sweeps. Until then, large `num_envs` runs would be noise.
+The active path, however, is now Isaac Lab:
+
+```bash
+bash scripts/create_isaaclab_blackwell_env.sh
+ACCEPT_EULA=Y ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
+ACCEPT_EULA=Y GPU_ID=1 ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/blackwell_isaaclab_smoke_clean_gpu1.json \
+  METRICS_PATH=reports/blackwell_isaaclab_validation_clean_gpu1.json \
+  bash scripts/run_blackwell_isaaclab_smoke.sh
+```
+
+The next implementation milestone should port only the minimal ToolPose tracking environment to Isaac Lab. That means asset loading, robot and object state tensors, reset logic, observation construction, action application, reward parity, and a deterministic one-step smoke test. It should not be a full repo migration yet.
 
 ## Summary
 
-This phase turned SimToolReal from a cloned research repo into an auditable experiment workflow.
+This phase turned SimToolReal from a cloned research repo into an auditable experiment workflow, and it turned an ambiguous hardware question into a concrete engineering decision.
 
-The project now has system diagnostics, a Python 3.8 compatibility environment builder, an Isaac Gym Preview 4 download/install path, safe reproduction scripts, independent GPU launch wrappers, dry-run scaling sweeps, structured JSON/CSV result aggregation, best-run reproduction documentation, pretrained policy asset handling, and clear blocker tracking. The original training stack is blocked by a proven Blackwell/PyTorch runtime mismatch, not by missing imports or ambiguous setup.
+The project now has system diagnostics, a Python 3.8 compatibility environment builder, an Isaac Gym Preview 4 download/install path, safe reproduction scripts, independent GPU launch wrappers, dry-run scaling sweeps, structured JSON/CSV result aggregation, best-run reproduction documentation, pretrained policy asset handling, clear blocker tracking, and a clean Isaac Lab Blackwell runtime path. The original training stack is blocked by a proven Blackwell/PyTorch runtime mismatch, not by missing imports or ambiguous setup.
 
-Before asking how far two 96 GB Blackwell GPUs can scale SimToolReal, the repository now asks a better question: can we prove exactly what ran, where it ran, and what happened?
+Before asking how far two 96 GB Blackwell GPUs can scale SimToolReal, the repository now asks a better question: can we prove exactly what ran, where it ran, and what happened? For the original Isaac Gym stack, the answer is a documented failure. For the modern Isaac Lab stack, the answer is now a measured runtime path ready for a scoped ToolPose port.

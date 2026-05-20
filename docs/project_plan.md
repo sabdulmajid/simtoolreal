@@ -22,7 +22,8 @@ This pass audited the repository without changing training logic. The project is
 - `scripts/validate_compat_env.sh` proves the blocker with a minimal CUDA operation: `RuntimeError: CUDA error: no kernel image is available for execution on the device`.
 - Pretrained evaluation, DexToolBench evaluation, scratch smoke, and finetune smoke all reach CUDA execution and fail with the same kernel-image error. Do not start GPU scaling until this validation passes.
 - Isaac Gym Preview 4's Python package declares `python_requires='>=3.6,<3.9'` and ships Python 3.8 bindings. Modern Blackwell-capable PyTorch wheels are not available for this Python 3.8 path in the tested package indexes, so the conflict is structural.
-- A separate Isaac Lab environment now runs a bounded Cartpole smoke task on both Blackwell GPUs, but it is not dependency-clean. Treat this as a validated direction, not a completed SimToolReal port.
+- A separate clean Isaac Lab environment now runs bounded Cartpole smoke tasks on both Blackwell GPUs with torch 2.7.0+cu128, and a 12,288-env GPU0 smoke point has been measured. Treat this as a validated runtime direction, not a completed SimToolReal port.
+- The Isaac Lab environment still reports one FastAPI/Starlette dependency conflict, so runtime reports use `success_with_dependency_conflicts`.
 - True multi-GPU training is not verified. The SimToolReal launcher forces `multi_gpu=False`, and the vendored distributed path contains `cuda:0` assumptions.
 
 References: [NVIDIA CUDA 12.8 SM_120 support](https://docs.nvidia.com/cuda/archive/12.8.0/cuda-features-archive/index.html), [NVIDIA Blackwell compatibility guide](https://docs.nvidia.com/cuda/archive/12.8.1/blackwell-compatibility-guide/index.html), [PyTorch 2.7 Blackwell/CUDA 12.8 release](https://pytorch.org/blog/pytorch-2-7/), [NVIDIA Isaac Gym Preview 4 Blackwell forum report](https://forums.developer.nvidia.com/t/isaac-gym-preview-4-incompatible-with-rtx-5080-blackwell-sm-120-libphysxgpu-64-so-missing-sm-120-kernels/367941).
@@ -57,7 +58,7 @@ References: [NVIDIA CUDA 12.8 SM_120 support](https://docs.nvidia.com/cuda/archi
 
 ### Phase 4: Isaac Lab Port
 
-- First build a clean Isaac Lab compatibility environment and rerun `scripts/run_blackwell_isaaclab_smoke.sh` on GPU 0 and GPU 1.
+- Use the clean Isaac Lab compatibility environment created by `scripts/create_isaaclab_blackwell_env.sh`.
 - Port only the minimal ToolPose tracking environment as a new Isaac Lab task rather than editing the Isaac Gym task in place.
 - Reuse assets and pure math helpers where possible.
 - Build parity tests before training.
