@@ -62,7 +62,9 @@ The chosen path is Isaac Lab for Blackwell. The evidence is now:
 - torch advertises `sm_120` and runs a CUDA kernel on Blackwell;
 - Isaac Lab Cartpole smoke runs on GPU 0 and GPU 1;
 - a bounded 12,288-env Isaac Lab Cartpole smoke runs on GPU 0;
-- the clean Isaac Lab environment still has one FastAPI/Starlette dependency conflict.
+- the SimToolReal ToolPose asset/state probe loads the real SHARPA robot, table, and generated tool in Isaac Lab on GPU 0 and GPU 1;
+- the probe exposes the 29-joint action target tensor, palm/fingertip body tensors, tool root state tensor, and a finite 140-dimensional policy-observation candidate tensor;
+- the clean Isaac Lab environment still has documented dependency conflicts under `pip check`.
 
 Do not spend more time scaling the original Isaac Gym stack on this Blackwell
 machine.
@@ -98,14 +100,38 @@ ACCEPT_EULA=Y NUM_ENVS=12288 STEPS=32 \
 
 Expected current result: `success_with_dependency_conflicts`. This means the
 simulator and CUDA smoke worked, but the environment still has the documented
-FastAPI/Starlette dependency conflict.
+dependency conflicts.
+
+Validate real SimToolReal ToolPose assets on GPU 0:
+
+```bash
+ACCEPT_EULA=Y ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/isaaclab_toolpose_asset_probe_gpu0.json \
+  METRICS_PATH=reports/isaaclab_toolpose_asset_probe_metrics_gpu0.json \
+  NUM_ENVS=2 STEPS=4 \
+  bash scripts/run_isaaclab_toolpose_asset_probe.sh
+```
+
+Validate real SimToolReal ToolPose assets on GPU 1:
+
+```bash
+ACCEPT_EULA=Y GPU_ID=1 ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/isaaclab_toolpose_asset_probe_gpu1.json \
+  METRICS_PATH=reports/isaaclab_toolpose_asset_probe_metrics_gpu1.json \
+  NUM_ENVS=1 STEPS=2 \
+  bash scripts/run_isaaclab_toolpose_asset_probe.sh
+```
 
 ## Next Milestone
 
 Begin a scoped port of the minimal ToolPose tracking environment to Isaac Lab.
-Do not port the full repo yet. The first port milestone should only cover asset
-loading, reset, observation/action plumbing, reward parity, and a deterministic
-one-step smoke test.
+Do not port the full repo yet. The asset/state probe already proved that the
+real robot, table, generated tool, action tensor, object tensor, palm/fingertip
+state access, and 140-dimensional observation candidate can run on Blackwell.
+
+The next implementation should turn that probe into a minimal `DirectRLEnv` and
+add explicit joint-order mapping, because Isaac Lab imports all 29 expected
+joint names but not in the same raw order as Isaac Gym.
 
 ## If A Blackwell-Capable Python 3.8 Torch Build Is Installed
 

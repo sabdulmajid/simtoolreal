@@ -22,8 +22,11 @@ This pass audited the repository without changing training logic. The project is
 - `scripts/validate_compat_env.sh` proves the blocker with a minimal CUDA operation: `RuntimeError: CUDA error: no kernel image is available for execution on the device`.
 - Pretrained evaluation, DexToolBench evaluation, scratch smoke, and finetune smoke all reach CUDA execution and fail with the same kernel-image error. Do not start GPU scaling until this validation passes.
 - Isaac Gym Preview 4's Python package declares `python_requires='>=3.6,<3.9'` and ships Python 3.8 bindings. Modern Blackwell-capable PyTorch wheels are not available for this Python 3.8 path in the tested package indexes, so the conflict is structural.
-- A separate clean Isaac Lab environment now runs bounded Cartpole smoke tasks on both Blackwell GPUs with torch 2.7.0+cu128, and a 12,288-env GPU0 smoke point has been measured. Treat this as a validated runtime direction, not a completed SimToolReal port.
-- The Isaac Lab environment still reports one FastAPI/Starlette dependency conflict, so runtime reports use `success_with_dependency_conflicts`.
+- A separate clean Isaac Lab environment now runs bounded Cartpole smoke tasks on both Blackwell GPUs with torch 2.7.0+cu128, and a 12,288-env GPU0 smoke point has been measured.
+- The clean Isaac Lab path now also runs a SimToolReal ToolPose asset/state probe on both GPUs. It loads the real SHARPA robot URDF, table URDF, and a generated handle-head tool URDF, then verifies all 29 expected joints, palm/fingertip bodies, `[num_envs, 29]` action targets, `[num_envs, 13]` tool root states, and `[num_envs, 140]` policy-observation candidate tensors.
+- The ToolPose probe is bridge evidence, not a completed SimToolReal environment, training run, or DexToolBench result.
+- The Isaac Lab environment still reports dependency conflicts under `pip check`, so runtime reports use `success_with_dependency_conflicts`.
+- The ToolPose probe found that Isaac Lab's raw joint order differs from the Isaac Gym policy order after the first eight joints. The Isaac Lab port must use explicit gather/scatter maps for actions and observations.
 - True multi-GPU training is not verified. The SimToolReal launcher forces `multi_gpu=False`, and the vendored distributed path contains `cuda:0` assumptions.
 
 References: [NVIDIA CUDA 12.8 SM_120 support](https://docs.nvidia.com/cuda/archive/12.8.0/cuda-features-archive/index.html), [NVIDIA Blackwell compatibility guide](https://docs.nvidia.com/cuda/archive/12.8.1/blackwell-compatibility-guide/index.html), [PyTorch 2.7 Blackwell/CUDA 12.8 release](https://pytorch.org/blog/pytorch-2-7/), [NVIDIA Isaac Gym Preview 4 Blackwell forum report](https://forums.developer.nvidia.com/t/isaac-gym-preview-4-incompatible-with-rtx-5080-blackwell-sm-120-libphysxgpu-64-so-missing-sm-120-kernels/367941).
@@ -59,7 +62,8 @@ References: [NVIDIA CUDA 12.8 SM_120 support](https://docs.nvidia.com/cuda/archi
 ### Phase 4: Isaac Lab Port
 
 - Use the clean Isaac Lab compatibility environment created by `scripts/create_isaaclab_blackwell_env.sh`.
-- Port only the minimal ToolPose tracking environment as a new Isaac Lab task rather than editing the Isaac Gym task in place.
+- Start from the passing `scripts/validate_isaaclab_toolpose_assets.py` probe and port only the minimal ToolPose tracking environment as a new Isaac Lab task rather than editing the Isaac Gym task in place.
+- Add explicit Isaac Gym policy-order to Isaac Lab articulation-order joint mappings before loading checkpoints or applying policy actions.
 - Reuse assets and pure math helpers where possible.
 - Build parity tests before training.
 

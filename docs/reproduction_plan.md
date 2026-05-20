@@ -241,6 +241,41 @@ Cartpole on both GPUs, and completes a 12,288-env GPU0 smoke. The result is
 recorded as `success_with_dependency_conflicts` because `pip check` reports the
 known FastAPI/Starlette conflict.
 
+## 10. Blackwell ToolPose Asset/State Probe
+
+After the Isaac Lab smoke passes, validate that the actual SimToolReal ToolPose
+assets and state tensors load under the Blackwell-compatible runtime:
+
+GPU 0:
+
+```bash
+ACCEPT_EULA=Y ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/isaaclab_toolpose_asset_probe_gpu0.json \
+  METRICS_PATH=reports/isaaclab_toolpose_asset_probe_metrics_gpu0.json \
+  NUM_ENVS=2 STEPS=4 \
+  bash scripts/run_isaaclab_toolpose_asset_probe.sh
+```
+
+GPU 1:
+
+```bash
+ACCEPT_EULA=Y GPU_ID=1 ISAACLAB_CONDA_ENV=/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell \
+  REPORT_PATH=reports/isaaclab_toolpose_asset_probe_gpu1.json \
+  METRICS_PATH=reports/isaaclab_toolpose_asset_probe_metrics_gpu1.json \
+  NUM_ENVS=1 STEPS=2 \
+  bash scripts/run_isaaclab_toolpose_asset_probe.sh
+```
+
+Current result in this workspace: both probes complete with
+`success_with_dependency_conflicts`. They load the real KUKA+SHARPA robot URDF,
+the table URDF, and a generated handle-head tool URDF. The probe verifies all
+29 expected joints, the palm body, all five fingertip bodies, an action target
+shape of `[num_envs, 29]`, a tool root-state shape of `[num_envs, 13]`, and a
+finite policy-observation candidate shape of `[num_envs, 140]`.
+
+This is not a trained policy result. It is the reproducible handoff point for
+the scoped Isaac Lab ToolPose environment port.
+
 ## Current Evidence From This Shell
 
 - System report: `reports/system_check.json`
@@ -261,8 +296,12 @@ known FastAPI/Starlette conflict.
 - Clean Isaac Lab GPU0 report: `reports/blackwell_isaaclab_smoke_clean_gpu0.json`
 - Clean Isaac Lab GPU1 report: `reports/blackwell_isaaclab_smoke_clean_gpu1.json`
 - Clean Isaac Lab 12,288-env report: `reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json`
+- ToolPose asset/state GPU0 report: `reports/isaaclab_toolpose_asset_probe_gpu0.json`
+- ToolPose asset/state GPU0 metrics: `reports/isaaclab_toolpose_asset_probe_metrics_gpu0.json`
+- ToolPose asset/state GPU1 report: `reports/isaaclab_toolpose_asset_probe_gpu1.json`
+- ToolPose asset/state GPU1 metrics: `reports/isaaclab_toolpose_asset_probe_metrics_gpu1.json`
 
-These reports currently show that the Python 3.8 dependency stack, Isaac Gym Preview 4, repo-local `rl_games`, and pretrained checkpoint are in place. Original SimToolReal execution remains blocked because torch 2.4.1+cu124 does not run CUDA kernels on the installed Blackwell `sm_120` GPUs.
+These reports currently show that the Python 3.8 dependency stack, Isaac Gym Preview 4, repo-local `rl_games`, and pretrained checkpoint are in place. Original SimToolReal execution remains blocked because torch 2.4.1+cu124 does not run CUDA kernels on the installed Blackwell `sm_120` GPUs. The Isaac Lab path is now stronger than a generic runtime smoke: it loads the real ToolPose robot/table/tool assets and exposes the required state tensor shapes on both GPUs.
 
 See `docs/experiment_discipline.md` for the exact recorded fields and the
 workflow for reproducing the best recorded run.

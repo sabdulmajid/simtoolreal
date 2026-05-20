@@ -1,8 +1,8 @@
 # Experiment Summary
 
-Generated: 2026-05-20T10:23:16Z
+Generated: 2026-05-20T10:46:15Z
 
-Total rows: 60
+Total rows: 62
 
 ## Status Counts
 
@@ -12,7 +12,7 @@ Total rows: 60
 - `gpu_runtime_error`: 12
 - `missing_asset`: 2
 - `success`: 8
-- `success_with_dependency_conflicts`: 8
+- `success_with_dependency_conflicts`: 10
 
 ## Mode Counts
 
@@ -24,6 +24,7 @@ Total rows: 60
 - `finetune`: 5
 - `isaacgym_download`: 2
 - `isaaclab_environment_setup`: 2
+- `isaaclab_toolpose_asset_probe`: 2
 - `pretrained_eval`: 7
 - `scratch`: 12
 - `unknown`: 4

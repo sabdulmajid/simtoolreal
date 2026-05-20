@@ -1,0 +1,396 @@
+{
+  "app_error": null,
+  "asset_probe": {
+    "assets": {
+      "generated_tool_urdf": "/tmp/simtoolreal_isaaclab_assets/toolpose_handle_head_blackwell_probe.urdf",
+      "robot_urdf": "/pub7/neel2/simtoolreal/assets/urdf/kuka_sharpa_description/iiwa14_left_sharpa_adjusted_restricted.urdf",
+      "table_urdf": "/pub7/neel2/simtoolreal/assets/urdf/table_narrow.urdf"
+    },
+    "checks": {
+      "action_shape_is_29": true,
+      "all_expected_joints_present": true,
+      "all_required_bodies_present": true,
+      "observation_shape_is_140": true,
+      "robot_has_29_joints": true,
+      "tool_state_shape_ok": true
+    },
+    "device": "cuda:0",
+    "elapsed_sec": 0.09098660387098789,
+    "num_envs": 2,
+    "robot": {
+      "body_names": [
+        "iiwa14_link_0",
+        "iiwa14_link_1",
+        "iiwa14_link_2",
+        "iiwa14_link_3",
+        "iiwa14_link_4",
+        "iiwa14_link_5",
+        "iiwa14_link_6",
+        "iiwa14_link_7",
+        "left_thumb_CMC_VL",
+        "left_index_MCP_VL",
+        "left_middle_MCP_VL",
+        "left_ring_MCP_VL",
+        "left_pinky_MC",
+        "left_thumb_MC",
+        "left_index_PP",
+        "left_middle_PP",
+        "left_ring_PP",
+        "left_pinky_MCP_VL",
+        "left_thumb_MCP_VL",
+        "left_index_MP",
+        "left_middle_MP",
+        "left_ring_MP",
+        "left_pinky_PP",
+        "left_thumb_PP",
+        "left_index_DP",
+        "left_middle_DP",
+        "left_ring_DP",
+        "left_pinky_MP",
+        "left_thumb_DP",
+        "left_pinky_DP"
+      ],
+      "expected_joint_names": [
+        "iiwa14_joint_1",
+        "iiwa14_joint_2",
+        "iiwa14_joint_3",
+        "iiwa14_joint_4",
+        "iiwa14_joint_5",
+        "iiwa14_joint_6",
+        "iiwa14_joint_7",
+        "left_1_thumb_CMC_FE",
+        "left_thumb_CMC_AA",
+        "left_thumb_MCP_FE",
+        "left_thumb_MCP_AA",
+        "left_thumb_IP",
+        "left_2_index_MCP_FE",
+        "left_index_MCP_AA",
+        "left_index_PIP",
+        "left_index_DIP",
+        "left_3_middle_MCP_FE",
+        "left_middle_MCP_AA",
+        "left_middle_PIP",
+        "left_middle_DIP",
+        "left_4_ring_MCP_FE",
+        "left_ring_MCP_AA",
+        "left_ring_PIP",
+        "left_ring_DIP",
+        "left_5_pinky_CMC",
+        "left_pinky_MCP_FE",
+        "left_pinky_MCP_AA",
+        "left_pinky_PIP",
+        "left_pinky_DIP"
+      ],
+      "extra_joints": [],
+      "fingertip_body_ids": [
+        24,
+        25,
+        26,
+        28,
+        29
+      ],
+      "fingertip_body_names": [
+        "left_index_DP",
+        "left_middle_DP",
+        "left_ring_DP",
+        "left_thumb_DP",
+        "left_pinky_DP"
+      ],
+      "joint_names": [
+        "iiwa14_joint_1",
+        "iiwa14_joint_2",
+        "iiwa14_joint_3",
+        "iiwa14_joint_4",
+        "iiwa14_joint_5",
+        "iiwa14_joint_6",
+        "iiwa14_joint_7",
+        "left_1_thumb_CMC_FE",
+        "left_2_index_MCP_FE",
+        "left_3_middle_MCP_FE",
+        "left_4_ring_MCP_FE",
+        "left_5_pinky_CMC",
+        "left_thumb_CMC_AA",
+        "left_index_MCP_AA",
+        "left_middle_MCP_AA",
+        "left_ring_MCP_AA",
+        "left_pinky_MCP_FE",
+        "left_thumb_MCP_FE",
+        "left_index_PIP",
+        "left_middle_PIP",
+        "left_ring_PIP",
+        "left_pinky_MCP_AA",
+        "left_thumb_MCP_AA",
+        "left_index_DIP",
+        "left_middle_DIP",
+        "left_ring_DIP",
+        "left_pinky_PIP",
+        "left_thumb_IP",
+        "left_pinky_DIP"
+      ],
+      "joint_order_matches_isaacgym": false,
+      "missing_expected_joints": [],
+      "missing_required_bodies": [],
+      "num_bodies": 30,
+      "num_instances": 2,
+      "num_joints": 29,
+      "palm_body_ids": [
+        7
+      ],
+      "palm_body_names": [
+        "iiwa14_link_7"
+      ]
+    },
+    "seed": 42,
+    "sim_dt": 0.008333333333333333,
+    "state_tensors": {
+      "action_target_shape": [
+        2,
+        29
+      ],
+      "body_pos_shape": [
+        2,
+        30,
+        3
+      ],
+      "joint_pos_shape": [
+        2,
+        29
+      ],
+      "joint_vel_shape": [
+        2,
+        29
+      ],
+      "policy_observation_first_row_finite": true,
+      "policy_observation_shape": [
+        2,
+        140
+      ],
+      "tool_root_state_shape": [
+        2,
+        13
+      ]
+    },
+    "steps": 4,
+    "success": true,
+    "throughput_env_steps_per_sec": 87.9250313743262
+  },
+  "command": "/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell/bin/python /pub7/neel2/simtoolreal/scripts/validate_isaaclab_toolpose_assets.py --headless --device cuda:0 --gpu-id 0 --num-envs 2 --steps 4 --seed 42 --generated-asset-dir /tmp/simtoolreal_isaaclab_assets --report-path reports/isaaclab_toolpose_asset_probe_metrics_gpu0.json",
+  "device": "cuda:0",
+  "ended_at_utc": "2026-05-20T10:35:32Z",
+  "exit_code": 0,
+  "gpu_id": "0",
+  "gpu_samples": {
+    "avg_gpu_util_percent": 33.8,
+    "peak_gpu_util_percent": 37,
+    "peak_vram_mib": 38256,
+    "sample_count": 10,
+    "samples": [
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 35380,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 35380, 37, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:20Z",
+        "utilization_gpu_percent": 37
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 35953,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 35953, 33, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:21Z",
+        "utilization_gpu_percent": 33
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 36104,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 36104, 35, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:22Z",
+        "utilization_gpu_percent": 35
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 36126,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 36126, 32, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:23Z",
+        "utilization_gpu_percent": 32
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 36126,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 36126, 32, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:25Z",
+        "utilization_gpu_percent": 32
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 36126,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 36126, 32, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:26Z",
+        "utilization_gpu_percent": 32
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 36158,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 36158, 32, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:27Z",
+        "utilization_gpu_percent": 32
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 36188,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 36188, 34, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:28Z",
+        "utilization_gpu_percent": 34
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 36188,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 36188, 34, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:29Z",
+        "utilization_gpu_percent": 34
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 38256,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 38256, 37, 580.142",
+        "timestamp_utc": "2026-05-20T10:35:31Z",
+        "utilization_gpu_percent": 37
+      }
+    ]
+  },
+  "imports": {
+    "isaaclab": {
+      "file": "/pub7/neel/vlm/IsaacLab/source/isaaclab/isaaclab/__init__.py",
+      "import_ok": true
+    },
+    "isaacsim": {
+      "file": "/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell/lib/python3.11/site-packages/isaacsim/__init__.py",
+      "import_ok": true
+    },
+    "trimesh": {
+      "file": "/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell/lib/python3.11/site-packages/trimesh/__init__.py",
+      "import_ok": true
+    }
+  },
+  "message": "ToolPose asset/state probe succeeded, but pip check reports dependency conflicts.",
+  "metrics": {
+    "avg_gpu_util_percent": 33.8,
+    "final_reward": null,
+    "peak_gpu_util_percent": 37,
+    "peak_vram_mib": 38256,
+    "throughput_fps": 87.9250313743262
+  },
+  "mode": "isaaclab_toolpose_asset_probe",
+  "num_envs": 2,
+  "nvidia_smi_after": {
+    "driver_version": "580.142",
+    "index": "0",
+    "memory_total_mib": 97887,
+    "memory_used_mib": 38318,
+    "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 38318, 38, 580.142",
+    "utilization_gpu_percent": 38
+  },
+  "pip_check": {
+    "ok": false,
+    "returncode": 1,
+    "stderr": "",
+    "stdout": "simtoolreal 0.1.0 requires gym, which is not installed.\nsimtoolreal 0.1.0 requires hydra-core, which is not installed.\nsimtoolreal 0.1.0 requires isaacgym-stubs, which is not installed.\nsimtoolreal 0.1.0 requires mujoco, which is not installed.\nsimtoolreal 0.1.0 requires ninja, which is not installed.\nsimtoolreal 0.1.0 requires omegaconf, which is not installed.\nsimtoolreal 0.1.0 requires opencv-python, which is not installed.\nsimtoolreal 0.1.0 requires pyopenssl, which is not installed.\nsimtoolreal 0.1.0 requires pyrender, which is not installed.\nsimtoolreal 0.1.0 requires pysdf, which is not installed.\nsimtoolreal 0.1.0 requires pytorch-kinematics, which is not installed.\nsimtoolreal 0.1.0 requires pytorch3d, which is not installed.\nsimtoolreal 0.1.0 requires pyvirtualdisplay, which is not installed.\nsimtoolreal 0.1.0 requires rl-games, which is not installed.\nsimtoolreal 0.1.0 requires ruff, which is not installed.\nsimtoolreal 0.1.0 requires tensorboardx, which is not installed.\nsimtoolreal 0.1.0 requires termcolor, which is not installed.\nsimtoolreal 0.1.0 requires transforms3d, which is not installed.\nsimtoolreal 0.1.0 requires tyro, which is not installed.\nsimtoolreal 0.1.0 requires urdfpy, which is not installed.\nsimtoolreal 0.1.0 requires viser, which is not installed.\nsimtoolreal 0.1.0 requires wandb, which is not installed.\nsimtoolreal 0.1.0 requires yourdfpy, which is not installed.\nsimtoolreal 0.1.0 has requirement numpy==1.23.0, but you have numpy 1.26.0.\nsimtoolreal 0.1.0 has requirement trimesh==3.23.5, but you have trimesh 4.5.1.\nsimtoolreal 0.1.0 has requirement warp-lang==0.10.1, but you have warp-lang 1.13.0.\nfastapi 0.115.7 has requirement starlette<0.46.0,>=0.40.0, but you have starlette 0.49.1."
+  },
+  "seed": 42,
+  "smoke_test": true,
+  "started_at_utc": "2026-05-20T10:35:20Z",
+  "status": "success_with_dependency_conflicts",
+  "steps": 4,
+  "system": {
+    "cuda_visible_devices": "0",
+    "environment_name": "/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell",
+    "git": {
+      "commit": "a59d36daea8b403544c9b3b81e46e00638bfdc49",
+      "dirty": true,
+      "status_short": "?? scripts/run_isaaclab_toolpose_asset_probe.sh\n?? scripts/validate_isaaclab_toolpose_assets.py\n?? simtoolreal_reproduction_gpu_goal.md"
+    },
+    "platform": "Linux-6.8.0-87-generic-x86_64-with-glibc2.39",
+    "python_executable": "/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell/bin/python",
+    "python_version": "3.11.15"
+  },
+  "torch": {
+    "cuda_arch_list": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120",
+      "compute_120"
+    ],
+    "cuda_available": true,
+    "cuda_device_count": 1,
+    "cuda_version": "12.8",
+    "device": "cuda:0",
+    "devices": [
+      {
+        "compute_capability": "sm_120",
+        "index": 0,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "total_vram_mib": 97247
+      }
+    ],
+    "file": "/pub7/neel2/conda_envs/simtoolreal-isaaclab-blackwell/lib/python3.11/site-packages/torch/__init__.py",
+    "import_ok": true,
+    "kernel_smoke_ok": true,
+    "kernel_smoke_result": 2048.0,
+    "version": "2.7.0+cu128"
+  }
+}

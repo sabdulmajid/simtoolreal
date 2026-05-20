@@ -125,4 +125,11 @@ A clean Isaac Lab smoke path now runs on both GPUs:
 - GPU 1: `reports/blackwell_isaaclab_smoke_clean_gpu1.json`
 - GPU 0, 12,288 envs: `reports/blackwell_isaaclab_smoke_clean_gpu0_12288.json`
 
-Those results are recorded as `success_with_dependency_conflicts` because of a documented FastAPI/Starlette package conflict. Do not interpret them as SimToolReal training throughput. They prove the Blackwell runtime path and one bounded 12,288-env Isaac Lab smoke point, not original Isaac Gym scalability.
+The Isaac Lab ToolPose asset/state probe also runs on both GPUs:
+
+- GPU 0: `reports/isaaclab_toolpose_asset_probe_gpu0.json`
+- GPU 1: `reports/isaaclab_toolpose_asset_probe_gpu1.json`
+
+Those ToolPose reports validate real SimToolReal robot/table/generated-tool asset loading and state tensor shapes, not training scalability. They are the correct bridge into an Isaac Lab ToolPose environment port. Do not run larger ToolPose sweeps until the minimal `DirectRLEnv`, joint-order mapping, reset logic, reward logic, and one-step parity tests exist.
+
+These results are recorded as `success_with_dependency_conflicts` because of documented package conflicts in the clean Isaac Lab environment. Do not interpret them as SimToolReal training throughput. They prove the Blackwell runtime path, one bounded 12,288-env Isaac Lab smoke point, and real ToolPose asset/state feasibility, not original Isaac Gym scalability.

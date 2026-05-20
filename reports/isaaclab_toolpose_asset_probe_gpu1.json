@@ -1,0 +1,27 @@
+{
+  "avg_gpu_util_percent": 53.09090909090909,
+  "command": "CUDA_VISIBLE_DEVICES=1 PYTHONPATH=/pub7/neel2/simtoolreal /pub7/neel/vlm/IsaacLab/isaaclab.sh -p /pub7/neel2/simtoolreal/scripts/validate_isaaclab_toolpose_assets.py --headless --device cuda:0 --gpu-id 1 --num-envs 1 --steps 2 --seed 42 --generated-asset-dir /tmp/simtoolreal_isaaclab_assets --report-path reports/isaaclab_toolpose_asset_probe_metrics_gpu1.json ",
+  "ended_at_utc": "2026-05-20T10:41:42Z",
+  "exit_code": 0,
+  "gpu_id": "1",
+  "joint_order_matches_isaacgym": false,
+  "log_path": "logs/isaaclab_toolpose_asset_probe_20260520T104129Z.log",
+  "message": "ToolPose asset/state probe succeeded, but pip check reports dependency conflicts.",
+  "metrics_path": "reports/isaaclab_toolpose_asset_probe_metrics_gpu1.json",
+  "mode": "isaaclab_toolpose_asset_probe",
+  "notes": "SimToolReal ToolPose asset/state probe, not a trained policy run.",
+  "num_envs": 1,
+  "peak_gpu_util_percent": 56,
+  "peak_vram_mib": 31627,
+  "policy_observation_shape": [
+    1,
+    140
+  ],
+  "robot_num_bodies": 30,
+  "robot_num_joints": 29,
+  "seed": 42,
+  "smoke_test": true,
+  "started_at_utc": "2026-05-20T10:41:29Z",
+  "status": "success_with_dependency_conflicts",
+  "throughput_fps": 24.896447068515812
+}

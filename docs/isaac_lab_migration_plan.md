@@ -2,6 +2,13 @@
 
 This repo is not currently Isaac Lab-compatible. The migration should be a new task implementation with parity tests, not an in-place rewrite of the Isaac Gym task.
 
+Current bridge evidence: `scripts/validate_isaaclab_toolpose_assets.py` and
+`scripts/run_isaaclab_toolpose_asset_probe.sh` now load the real SHARPA robot
+URDF, table URDF, and a procedurally generated handle-head tool in Isaac Lab on
+both Blackwell GPUs. The probe exposes the 29-joint action tensor, palm and
+fingertip body tensors, tool root state tensor, and a finite 140-dimensional
+policy-observation candidate. It is not a full environment or training port.
+
 ## Source Files To Port
 
 - `isaacgymenvs/tasks/simtoolreal/env.py`: main environment, reset logic, state buffers, rewards, observations, actions, asset creation, random forces, video/debug utilities.
@@ -63,7 +70,7 @@ Keep the Isaac Gym implementation as the reference until parity is demonstrated.
 ## Known Pitfalls
 
 - Quaternion convention: Isaac Gym tensors here use `xyzw`; Isaac Lab/Isaac Sim APIs often expose `wxyz` in some interfaces. Add explicit conversion tests at every boundary.
-- Joint order: current policy assumes a 29-action order with 7 arm DOFs followed by Sharpa hand DOFs. Verify imported articulation joint order exactly.
+- Joint order: current policy assumes a 29-action order with 7 arm DOFs followed by Sharpa hand DOFs. The asset probe found that Isaac Lab imports all 29 expected joint names, but the raw articulation order does not match the Isaac Gym policy order after the first eight joints. The Lab task must build explicit action/observation gather-scatter maps.
 - GPU physics buffers: Isaac Gym exposes wrapped root/DOF/rigid-body tensors directly; Isaac Lab uses different scene/articulation buffers and update timing.
 - Collision geometry: Isaac Gym URDF loading, `replace_cylinder_with_capsule`, VHACD, convex decomposition, and collision filters may not match Isaac Sim import behavior.
 - Contact stability: fingertip/table/tool contacts are central to reward and reset behavior; solver iterations, contact offsets, rest offsets, and material combine modes must be tuned and tested.
@@ -73,16 +80,17 @@ Keep the Isaac Gym implementation as the reference until parity is demonstrated.
 
 ## Phased Implementation
 
-1. Package skeleton: create `source/simtoolreal_lab` with installable Isaac Lab extension metadata.
-2. Asset import: load robot, table, one fixed DexToolBench object, and one generated object in a single Lab scene.
-3. State parity: expose joint/root/body state tensors matching the Isaac Gym naming and shape contracts.
-4. Reset parity: reproduce deterministic reset with all noise disabled and compare object, table, robot, and goal states.
-5. Observation parity: compare `compute_observation` outputs for a saved deterministic state.
-6. Reward parity: compare individual reward components for fixed states and actions.
-7. Action parity: compare one-step joint target updates from identical observations/actions.
-8. Evaluation parity: run one DexToolBench task with a pretrained policy and compare success trajectory qualitatively and numerically.
-9. Training bring-up: train at small `num_envs`, then scale.
-10. Distributed training: only after single-GPU Lab training is stable.
+1. Asset/state probe: done for the real SHARPA robot, table, and generated tool on GPU 0 and GPU 1.
+2. Package skeleton: create `source/simtoolreal_lab` with installable Isaac Lab extension metadata.
+3. Minimal `DirectRLEnv`: reuse the probe's asset configs, state access, and 140-dimensional observation candidate in a proper Isaac Lab environment class.
+4. Joint mapping: add explicit Isaac Gym policy-order to Isaac Lab articulation-order maps and tests.
+5. Reset parity: reproduce deterministic reset with all noise disabled and compare object, table, robot, and goal states.
+6. Observation parity: compare `compute_observation` outputs for a saved deterministic state.
+7. Reward parity: compare individual reward components for fixed states and actions.
+8. Action parity: compare one-step joint target updates from identical observations/actions.
+9. Evaluation parity: run one DexToolBench task with a pretrained policy and compare success trajectory qualitatively and numerically.
+10. Training bring-up: train at small `num_envs`, then scale.
+11. Distributed training: only after single-GPU Lab training is stable.
 
 ## Tests Needed
 
