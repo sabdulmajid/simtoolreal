@@ -1,0 +1,19 @@
+{
+  "checkpoint_path": "pretrained_policy/model.pth",
+  "command": "CUDA_VISIBLE_DEVICES=0 python dextoolbench/eval.py --object-category hammer --object-name claw_hammer --task-name swing_down --checkpoint-path pretrained_policy/model.pth --config-path pretrained_policy/config.yaml --output-dir evals/smoke/hammer/claw_hammer/swing_down/pretrained_policy --num-episodes 1 --policy-name pretrained_policy ",
+  "ended_at_utc": "2026-05-20T06:39:22Z",
+  "exit_code": 1,
+  "gpu_id": 0,
+  "log_path": "logs/run_dextoolbench_eval_20260520T063906Z.log",
+  "message": "DexToolBench evaluation reached CUDA execution, but torch cannot run kernels on the visible GPU. See log.",
+  "metrics_path": "reports/metrics/run_dextoolbench_eval_20260520T063906Z.json",
+  "mode": "dextoolbench_eval",
+  "object_category": "hammer",
+  "object_name": "claw_hammer",
+  "run_all": "0",
+  "seed": "",
+  "smoke_test": "1",
+  "started_at_utc": "2026-05-20T06:39:06Z",
+  "status": "gpu_runtime_error",
+  "task_name": "swing_down"
+}

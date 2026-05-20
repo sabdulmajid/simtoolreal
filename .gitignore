@@ -211,11 +211,17 @@ dextoolbench/data/
 
 # Pretrained policy
 pretrained_policy/
+pretrained_policy.zip
 
 # Training output
 train_dir/
 runs/
 wandb/
+evals/
+
+# Generated validation artifacts
+logs/
+reports/metrics/
 
 # FoundationPose (separate repo)
 FoundationPose/

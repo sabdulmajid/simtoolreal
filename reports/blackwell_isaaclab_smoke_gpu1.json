@@ -1,0 +1,21 @@
+{
+  "avg_gpu_util_percent": 38.875,
+  "command": "CUDA_VISIBLE_DEVICES=1 /pub7/neel/vlm/IsaacLab/isaaclab.sh -p /pub7/neel2/simtoolreal/scripts/validate_blackwell_isaaclab.py --headless --device cuda:0 --gpu-id 1 --num-envs 16 --steps 16 --seed 42 --task Isaac-Cartpole-Direct-v0 --report-path reports/blackwell_isaaclab_validation_gpu1.json ",
+  "ended_at_utc": "2026-05-20T09:26:57Z",
+  "exit_code": 0,
+  "final_reward": 0.008275091648101807,
+  "gpu_id": "1",
+  "log_path": "logs/blackwell_isaaclab_smoke_20260520T092646Z.log",
+  "message": "Isaac Lab simulation succeeded, but pip check reports dependency conflicts.",
+  "metrics_path": "reports/blackwell_isaaclab_validation_gpu1.json",
+  "mode": "blackwell_isaaclab_validation",
+  "notes": "Isaac-Cartpole-Direct-v0",
+  "num_envs": 16,
+  "peak_gpu_util_percent": 47,
+  "peak_vram_mib": 24293,
+  "seed": 42,
+  "smoke_test": true,
+  "started_at_utc": "2026-05-20T09:26:46Z",
+  "status": "success_with_dependency_conflicts",
+  "throughput_fps": 1056.1218500949026
+}

@@ -1,0 +1,30 @@
+name: simtoolreal-py38
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - pip
+  - pip:
+      - hydra-core==1.3.2
+      - omegaconf==2.3.0
+      - gym==0.23.1
+      - termcolor
+      - requests
+      - tqdm
+      - pyyaml
+      - psutil
+      - setproctitle
+      - tensorboard
+      - tensorboardx
+      - wandb==0.12.21
+      - opencv-python==4.10.0.84
+      - tyro
+      - pytorch3d==0.3.0
+      - viser
+      - trimesh==3.23.5
+      - transforms3d
+      - matplotlib
+      - pyopenssl
+      - pyvirtualdisplay
+      - pytorch-kinematics
+      - yourdfpy

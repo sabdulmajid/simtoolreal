@@ -1,0 +1,15 @@
+{
+  "command": "CUDA_VISIBLE_DEVICES=0 /pub7/neel/vlm/IsaacLab/isaaclab.sh -p /pub7/neel2/simtoolreal/scripts/validate_blackwell_isaaclab.py --headless --device cuda:0 --gpu-id 0 --num-envs 16 --steps 16 --seed 42 --task Isaac-Cartpole-Direct-v0 --report-path reports/blackwell_isaaclab_validation_vlm.json ",
+  "ended_at_utc": "2026-05-20T09:25:00Z",
+  "exit_code": 0,
+  "gpu_id": "0",
+  "log_path": "logs/blackwell_isaaclab_smoke_vlm_20260520T092450Z.log",
+  "message": "Blackwell Isaac Lab smoke failed. See log.",
+  "metrics_path": "reports/blackwell_isaaclab_validation_vlm.json",
+  "mode": "blackwell_isaaclab_validation",
+  "num_envs": 16,
+  "seed": 42,
+  "smoke_test": true,
+  "started_at_utc": "2026-05-20T09:24:50Z",
+  "status": "failed"
+}

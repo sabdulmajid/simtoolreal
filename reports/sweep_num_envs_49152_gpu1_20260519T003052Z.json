@@ -1,0 +1,16 @@
+{
+  "command": "env CUDA_VISIBLE_DEVICES=1 python isaacgymenvs/launch_training.py --custom-experiment-name sweep_envs_49152_gpu1 --num-envs 49152 --num-blocks 6 --seed 0 --wandb-project simtoolreal --no-wandb-activate ",
+  "ended_at_utc": "2026-05-19T00:30:52Z",
+  "exit_code": 0,
+  "gpu_id": 1,
+  "log_path": "logs/sweep_num_envs_49152_gpu1_20260519T003052Z.log",
+  "message": "Sweep command was not executed.",
+  "mode": "scratch",
+  "num_blocks": 6,
+  "num_envs": 49152,
+  "sapg_block_size": 8192,
+  "seed": 0,
+  "smoke_test": "1",
+  "started_at_utc": "2026-05-19T00:30:52Z",
+  "status": "dry_run"
+}
