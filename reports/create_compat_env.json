@@ -1,0 +1,13 @@
+{
+  "command": "bash scripts/create_compat_env.sh",
+  "ended_at_utc": "2026-05-20T05:53:32Z",
+  "env_path": "/pub7/neel2/conda_envs/simtoolreal-py38",
+  "exit_code": 0,
+  "isaacgym_status": "not_requested",
+  "log_path": "logs/create_compat_env_20260520T055316Z.log",
+  "message": "Compatibility environment is ready; Isaac Gym status: not_requested.",
+  "started_at_utc": "2026-05-20T05:53:16Z",
+  "status": "success",
+  "torch_index_url": "https://download.pytorch.org/whl/cu121",
+  "torch_version": "2.4.1"
+}

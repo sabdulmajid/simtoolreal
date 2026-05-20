@@ -2,65 +2,73 @@
 
 ## Immediate Commands
 
-Create the documented Isaac Gym environment. `uv` was not on `PATH` during validation; install it first or use an existing Python 3.8 environment manager.
+The Python 3.8 compatibility environment now exists and can be recreated:
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-export PATH="$HOME/.local/bin:$PATH"
-uv venv --python 3.8
-echo 'export LD_LIBRARY_PATH=$(python -c "import sysconfig; print(sysconfig.get_config_var(\"LIBDIR\"))"):$LD_LIBRARY_PATH' >> .venv/bin/activate
-source .venv/bin/activate
-uv pip install -e .
-cd /path/to/extracted/isaacgym/python
-uv pip install -e .
-cd /pub7/neel2/simtoolreal/rl_games
-uv pip install -e .
-cd /pub7/neel2/simtoolreal
-python scripts/check_system.py
+bash scripts/create_compat_env.sh
+bash scripts/run_in_compat_env.sh python scripts/check_system.py
 ```
 
-If the imports pass, download assets:
+The next real blocker is Isaac Gym Preview 4. Install it only from an extracted local package:
 
 ```bash
-bash scripts/download_assets.sh
+export ISAAC_GYM_ROOT=/path/to/extracted/isaacgym
+bash scripts/create_compat_env.sh
+bash scripts/validate_compat_env.sh
 ```
 
-Then run the smallest evaluation and training smoke tests:
+Pass criterion:
+
+```text
+reports/system_check.json -> imports -> Isaac Gym -> import_ok: true
+```
+
+After Isaac Gym imports, rerun the smoke path in order:
 
 ```bash
-bash scripts/run_pretrained_eval.sh
-bash scripts/run_dextoolbench_eval.sh
-bash scripts/train_scratch_smoke.sh
-bash scripts/finetune_smoke.sh
+bash scripts/run_in_compat_env.sh bash scripts/run_pretrained_eval.sh
+bash scripts/run_in_compat_env.sh bash scripts/run_dextoolbench_eval.sh
+bash scripts/run_in_compat_env.sh bash scripts/train_scratch_smoke.sh
+bash scripts/run_in_compat_env.sh bash scripts/finetune_smoke.sh
 ```
 
-Only after smoke tests pass, dry-run and execute scaling:
+Download one DexToolBench task only after the Isaac Gym import passes:
 
 ```bash
-python scripts/profile_gpu_scaling.py --gpu-id 0
-DRY_RUN=1 GPU_ID=1 scripts/sweep_num_envs.sh
-python scripts/profile_gpu_scaling.py --gpu-id 0 --max-epochs 3 --run
+bash scripts/run_in_compat_env.sh python download_dextoolbench_data.py \
+  --object-category hammer \
+  --object-name claw_hammer \
+  --task-name swing_down
 ```
 
-## Next Engineering Milestone
+## If Isaac Gym Imports But Runtime Fails
 
-- Make the Python 3.8 Isaac Gym environment import cleanly.
-- If Isaac Gym fails on Blackwell, capture the exact PhysX/CUDA error in `logs/` and update `docs/known_blockers.md`.
-- If Isaac Gym imports, run a one-env environment creation smoke test before any large `num_envs` sweep.
-- Fix `deployment/rl_player.py` GPU pinning in a small behavior-preserving patch after pretrained evaluation is otherwise ready.
+Capture the exact runtime failure:
 
-## Next Research Milestone
+```bash
+GPU_ID=0 NUM_ENVS=128 NUM_BLOCKS=1 MAX_EPOCHS=1 \
+  bash scripts/run_in_compat_env.sh bash scripts/train_scratch_smoke.sh
+```
 
-- Establish a baseline pretrained DexToolBench result for one task.
-- Establish whether scratch training can start at the conservative smoke settings.
-- Measure stable throughput at 12288, 24576, and 49152 envs on a single GPU.
-- Compare independent GPU0 and GPU1 jobs only after one-GPU stability is known.
+Then update:
 
-## When To Attempt Isaac Lab
+- `docs/known_blockers.md`
+- `docs/current_status.md`
+- `reports/experiment_summary.md`
 
-Attempt the Isaac Lab port only after one of these is true:
+Do not run larger `num_envs` until the 128/768 env smoke path works.
 
-- Original Isaac Gym reproduction is working and has baseline evaluation/training evidence.
-- Original Isaac Gym is blocked by a confirmed Blackwell/PhysX binary incompatibility with exact logs.
+## If PyTorch Fails On Blackwell
 
-Do not start the Isaac Lab port during this milestone.
+The current Python 3.8 torch wheel is 2.4.1+cu121 and does not advertise `sm_120`. If runtime logs show an unsupported architecture or kernel image failure, the next milestone is a clean compatibility container/conda path with a Blackwell-capable torch build, not algorithm changes.
+
+## When To Scale
+
+Run scaling only after one smoke training or evaluation path succeeds:
+
+```bash
+python scripts/profile_gpu_scaling.py --gpu-id 0 --num-envs 12288 --smoke-test
+DRY_RUN=1 GPU_ID=1 bash scripts/sweep_num_envs.sh
+```
+
+Execute real sweeps only after the dry-run commands and small smoke test are clean.

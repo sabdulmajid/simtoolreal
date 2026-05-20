@@ -1,14 +1,14 @@
 {
   "checkpoint_path": "pretrained_policy/model.pth",
   "command": "bash scripts/run_dextoolbench_eval.sh",
-  "ended_at_utc": "2026-05-19T00:30:01Z",
+  "ended_at_utc": "2026-05-20T05:56:38Z",
   "exit_code": 1,
   "gpu_id": 0,
-  "log_path": "logs/run_dextoolbench_eval_20260519T003001Z.log",
-  "message": "Missing dependency: isaacgym. Activate the Isaac Gym SimToolReal environment first.",
+  "log_path": "logs/run_dextoolbench_eval_20260520T055638Z.log",
+  "message": "Missing dependency: isaacgym. Run bash scripts/create_compat_env.sh with ISAAC_GYM_ROOT pointing at Isaac Gym Preview 4, then rerun through scripts/run_in_compat_env.sh.",
   "mode": "dextoolbench_eval",
   "seed": "",
   "smoke_test": "1",
-  "started_at_utc": "2026-05-19T00:30:01Z",
+  "started_at_utc": "2026-05-20T05:56:38Z",
   "status": "dependency_error"
 }

@@ -346,6 +346,7 @@ def collect_environment_hints() -> Dict[str, str]:
         key: os.environ.get(key, "")
         for key in (
         "CUDA_VISIBLE_DEVICES",
+        "ISAAC_GYM_ROOT",
         "LD_LIBRARY_PATH",
         "PYTHONPATH",
         "VIRTUAL_ENV",
@@ -380,8 +381,64 @@ def print_environment_hints(info: Dict[str, str]) -> None:
         print("{}: {}".format(key, value if value else "<unset>"))
 
 
+def collect_compatibility_warnings(report: Dict[str, Any]) -> List[str]:
+    warnings: List[str] = []
+    python_version = sys.version_info
+    if python_version >= (3, 12):
+        warnings.append(
+            "Active Python is {}.{}. Isaac Gym Preview 4 workflows in this repo "
+            "expect Python 3.8.".format(python_version.major, python_version.minor)
+        )
+
+    torch_info = report.get("torch", {})
+    arch_list = set(torch_info.get("cuda_arch_list") or [])
+    for gpu in torch_info.get("gpus") or []:
+        capability = gpu.get("compute_capability")
+        name = gpu.get("name", "unknown GPU")
+        if capability and arch_list and capability not in arch_list:
+            warnings.append(
+                "{} reports {}, but this torch build advertises {}. "
+                "A newer PyTorch/CUDA stack may be required before GPU kernels "
+                "run on this device.".format(name, capability, sorted(arch_list))
+            )
+
+    imports = report.get("imports", {})
+    isaacgym = imports.get("Isaac Gym", {})
+    if not isaacgym.get("import_ok"):
+        warnings.append(
+            "isaacgym does not import. Install Isaac Gym Preview 4 into the active "
+            "Python 3.8 environment before running evaluation or training."
+        )
+
+    rl_games = imports.get("rl_games package", {})
+    if not rl_games.get("import_ok"):
+        warnings.append(
+            "rl_games.torch_runner does not import. Install the repo-local rl_games "
+            "fork with 'pip install -e rl_games --no-deps'."
+        )
+
+    artifacts = report.get("repo_artifacts", {})
+    pretrained = artifacts.get("pretrained_policy_files", {})
+    missing_policy = [path for path, exists in pretrained.items() if not exists]
+    if missing_policy:
+        warnings.append(
+            "Missing pretrained policy files: {}. Run 'bash scripts/download_assets.sh' "
+            "inside the compatibility environment.".format(", ".join(missing_policy))
+        )
+    return warnings
+
+
+def print_compatibility_warnings(warnings: List[str]) -> None:
+    print_section("Compatibility Warnings")
+    if not warnings:
+        print("No compatibility warnings detected.")
+        return
+    for warning in warnings:
+        print("- {}".format(warning))
+
+
 def collect_report(repo_root: Path) -> Dict[str, Any]:
-    return {
+    report = {
         "system": collect_basic_system(repo_root),
         "torch": collect_torch_status(),
         "nvidia_smi": collect_nvidia_smi(),
@@ -390,6 +447,8 @@ def collect_report(repo_root: Path) -> Dict[str, Any]:
         "repo_artifacts": collect_repo_paths(repo_root),
         "environment": collect_environment_hints(),
     }
+    report["compatibility_warnings"] = collect_compatibility_warnings(report)
+    return report
 
 
 def main() -> None:
@@ -409,6 +468,7 @@ def main() -> None:
     print_package_versions(report["package_versions"])
     print_repo_paths(report["repo_artifacts"])
     print_environment_hints(report["environment"])
+    print_compatibility_warnings(report["compatibility_warnings"])
     print_section("Report")
     print("Wrote {}".format(report_path))
 

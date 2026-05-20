@@ -113,6 +113,10 @@ def repair_row(row: Dict[str, Any]) -> Dict[str, Any]:
             row["mode"] = "finetune"
         elif "train_scratch" in source or "scratch" in source or "sweep_num_envs" in source:
             row["mode"] = "scratch"
+        elif "create_compat_env" in source:
+            row["mode"] = "environment_setup"
+        elif "validate_compat_env" in source:
+            row["mode"] = "environment_validation"
         elif "pretrained" in source:
             row["mode"] = "pretrained_eval"
         elif "dextoolbench" in source:
@@ -142,7 +146,12 @@ def numeric(row: Dict[str, Any], key: str) -> Optional[float]:
 
 
 def best_row(rows: Iterable[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
-    candidates = [row for row in rows if row.get("status") == "success"]
+    measured_modes = {"scratch", "finetune", "pretrained_eval", "dextoolbench_eval", "profile"}
+    candidates = [
+        row
+        for row in rows
+        if row.get("status") == "success" and row.get("mode") in measured_modes
+    ]
     metric_candidates = [
         row for row in candidates if numeric(row, "final_metric") is not None
     ]
@@ -211,7 +220,7 @@ def write_summary(rows: List[Dict[str, Any]], path: Path) -> None:
 
     lines.extend(["", "## Best Recorded Run", ""])
     if best is None:
-        lines.append("No successful run has been recorded yet.")
+        lines.append("No successful measured evaluation, training, or profile run has been recorded yet.")
     else:
         lines.append("- run_id: `{}`".format(best.get("run_id")))
         lines.append("- status: `{}`".format(best.get("status")))

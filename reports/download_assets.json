@@ -1,11 +1,14 @@
 {
-  "command": "bash scripts/download_assets.sh",
-  "ended_at_utc": "2026-05-19T00:29:47Z",
-  "exit_code": 1,
-  "log_path": "logs/download_assets_20260519T002947Z.log",
-  "message": "Missing dependency: tyro. Activate the SimToolReal environment and run 'uv pip install -e .' first.",
+  "command": "python download_pretrained_policy.py",
+  "download_all_dextoolbench": "0",
+  "download_dextoolbench": "0",
+  "download_pretrained": "1",
+  "ended_at_utc": "2026-05-20T05:46:50Z",
+  "exit_code": 0,
+  "log_path": "logs/download_assets_20260520T054540Z.log",
+  "message": "Asset command(s) completed.",
   "mode": "asset_download",
-  "smoke_test": "1",
-  "started_at_utc": "2026-05-19T00:29:47Z",
-  "status": "dependency_error"
+  "smoke_test": "0",
+  "started_at_utc": "2026-05-20T05:45:40Z",
+  "status": "success"
 }

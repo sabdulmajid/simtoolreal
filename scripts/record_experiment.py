@@ -162,6 +162,10 @@ def infer_mode(report: Dict[str, Any], source: str, command: str) -> Optional[st
         return "finetune"
     if "train_scratch" in source or "scratch" in source or "sweep_num_envs" in source:
         return "scratch"
+    if "create_compat_env" in source:
+        return "environment_setup"
+    if "validate_compat_env" in source:
+        return "environment_validation"
     if "pretrained" in source:
         return "pretrained_eval"
     if "dextoolbench" in source:

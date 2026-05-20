@@ -1,17 +1,17 @@
 {
   "command": "bash scripts/train_scratch_smoke.sh",
-  "ended_at_utc": "2026-05-19T00:30:16Z",
+  "ended_at_utc": "2026-05-20T05:56:38Z",
   "exit_code": 1,
   "gpu_id": 0,
-  "log_path": "logs/train_scratch_smoke_20260519T003016Z.log",
+  "log_path": "logs/train_scratch_smoke_20260520T055638Z.log",
   "max_epochs": 1,
-  "message": "Missing dependency: isaacgym. Activate the Isaac Gym SimToolReal environment first.",
+  "message": "Missing dependency: isaacgym. Run bash scripts/create_compat_env.sh with ISAAC_GYM_ROOT pointing at Isaac Gym Preview 4, then rerun through scripts/run_in_compat_env.sh.",
   "mode": "scratch",
   "num_blocks": 6,
   "num_envs": 768,
   "sapg_block_size": 128,
   "seed": 42,
   "smoke_test": "1",
-  "started_at_utc": "2026-05-19T00:30:16Z",
+  "started_at_utc": "2026-05-20T05:56:38Z",
   "status": "dependency_error"
 }

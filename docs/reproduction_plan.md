@@ -8,41 +8,42 @@ Run commands from the repository root.
 python scripts/check_system.py
 ```
 
-This writes `reports/system_check.json`. The current shell audited during this pass is not ready for this repo's Isaac Gym path: Python is 3.12.3, Isaac Gym is not importable, Isaac Lab is not importable, and the repo-local `rl_games` package is not installed.
+This writes `reports/system_check.json`.
 
 ## 1. Create The Isaac Gym Environment
 
-The official repo documentation requires Python 3.8 for Isaac Gym Preview 4:
+Use the checked-in compatibility script:
 
 ```bash
-uv venv --python 3.8
-echo 'export LD_LIBRARY_PATH=$(python -c "import sysconfig; print(sysconfig.get_config_var(\"LIBDIR\"))"):$LD_LIBRARY_PATH' >> .venv/bin/activate
-source .venv/bin/activate
-uv pip install -e .
+bash scripts/create_compat_env.sh
+bash scripts/run_in_compat_env.sh python scripts/check_system.py
 ```
 
-Install Isaac Gym Preview 4 outside this repo:
+Default environment path:
 
-```bash
-wget https://developer.nvidia.com/isaac-gym-preview-4 -O IsaacGym_Preview_4_Package.tar.gz
-tar -xzf IsaacGym_Preview_4_Package.tar.gz
-cd isaacgym/python
-uv pip install -e .
-cd -
+```text
+/pub7/neel2/conda_envs/simtoolreal-py38
 ```
 
-Install the repo-local `rl_games` fork last so it overrides any PyPI `rl-games` package:
+Install Isaac Gym Preview 4 from an extracted local package:
 
 ```bash
-cd rl_games
-uv pip install -e .
-cd -
+export ISAAC_GYM_ROOT=/path/to/extracted/isaacgym
+bash scripts/create_compat_env.sh
+bash scripts/validate_compat_env.sh
 ```
 
-Then re-run diagnostics:
+The script installs the repo and repo-local `rl_games` fork editable. It installs Isaac Gym only when `${ISAAC_GYM_ROOT}/python` exists.
 
-```bash
-python scripts/check_system.py
+Current validation in this workspace:
+
+```text
+Python: 3.8.20
+torch: 2.4.1+cu121
+rl_games.torch_runner: import OK
+isaacgym: ModuleNotFoundError
+pretrained_policy/config.yaml: present
+pretrained_policy/model.pth: present
 ```
 
 Expected pass criteria: `isaacgym` imports, `rl_games.torch_runner` imports, CUDA is available, and torch reports an architecture list compatible with the visible GPU. On Blackwell, this is the first likely failure point.
@@ -56,7 +57,7 @@ python download_pretrained_policy.py
 Safe wrapper with logs and a report:
 
 ```bash
-bash scripts/download_assets.sh
+bash scripts/run_in_compat_env.sh bash scripts/download_assets.sh
 ```
 
 Expected files:
@@ -82,7 +83,7 @@ Open `http://localhost:8080`.
 Headless one-task wrapper:
 
 ```bash
-bash scripts/run_pretrained_eval.sh
+bash scripts/run_in_compat_env.sh bash scripts/run_pretrained_eval.sh
 ```
 
 Set `INTERACTIVE=1` to use the viser UI wrapper path.
@@ -135,7 +136,7 @@ CUDA_VISIBLE_DEVICES=0 python dextoolbench/run_all_evals.py
 Safe wrapper:
 
 ```bash
-bash scripts/run_dextoolbench_eval.sh
+bash scripts/run_in_compat_env.sh bash scripts/run_dextoolbench_eval.sh
 ```
 
 Set `RUN_ALL=1` only after the one-task command succeeds.
@@ -163,7 +164,7 @@ WANDB_ACTIVATE=False NUM_ENVS=24576 scripts/launch_train_gpu0.sh
 Short smoke wrapper:
 
 ```bash
-bash scripts/train_scratch_smoke.sh
+bash scripts/run_in_compat_env.sh bash scripts/train_scratch_smoke.sh
 ```
 
 ## 7. Finetune From Pretrained
@@ -187,7 +188,7 @@ WANDB_ACTIVATE=False NUM_ENVS=24576 scripts/launch_train_gpu0.sh \
 Short smoke wrapper:
 
 ```bash
-bash scripts/finetune_smoke.sh
+bash scripts/run_in_compat_env.sh bash scripts/finetune_smoke.sh
 ```
 
 ## 8. Record Reproducibility Metadata
@@ -214,7 +215,7 @@ git status --short | tee train_dir/git_status.txt
 - Aggregated result JSON: `reports/experiment_results.json`
 - Best-run summary: `reports/experiment_summary.md`
 
-These reports currently show the blocker path, not a successful reproduction run.
+These reports currently show that the Python 3.8 dependency stack and pretrained checkpoint are in place, but original SimToolReal execution remains blocked by missing Isaac Gym and a possible PyTorch/Blackwell architecture mismatch.
 
 See `docs/experiment_discipline.md` for the exact recorded fields and the
 workflow for reproducing the best recorded run.

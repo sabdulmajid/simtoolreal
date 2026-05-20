@@ -1,6 +1,6 @@
 ---
 title: "Making SimToolReal Reproducible on Blackwell GPUs"
-date: "2026-05-18"
+date: "2026-05-20"
 description: "A technical summary of turning the original Isaac Gym SimToolReal repository into a reproducible, auditable GPU-scaling research workflow."
 tags:
   - "Robotics"
@@ -62,7 +62,24 @@ scripts/finetune_smoke.sh
 
 These scripts are intentionally conservative. They create logs and reports, fail early on missing dependencies or assets, avoid GUI paths by default, and use bounded smoke settings instead of silently launching expensive jobs.
 
-The third layer is GPU-scaling discipline. I added independent GPU launch and profiling utilities:
+The third layer is a real compatibility environment path. The original repo wants Python 3.8 and Isaac Gym Preview 4, while the default shell on this machine is not that environment. I added:
+
+```text
+environment-simtoolreal-py38.yml
+scripts/create_compat_env.sh
+scripts/run_in_compat_env.sh
+scripts/validate_compat_env.sh
+```
+
+The compatibility script creates or reuses:
+
+```text
+/pub7/neel2/conda_envs/simtoolreal-py38
+```
+
+It installs Python 3.8.20, torch 2.4.1+cu121, the SimToolReal package, the repo-local `rl_games` fork, and the wrapper dependencies. If `ISAAC_GYM_ROOT` points at an extracted Isaac Gym Preview 4 package, it also installs `${ISAAC_GYM_ROOT}/python`.
+
+The fourth layer is GPU-scaling discipline. I added independent GPU launch and profiling utilities:
 
 ```text
 scripts/launch_train_gpu0.sh
@@ -108,40 +125,57 @@ This matters because robotics simulation results are easy to overstate. A dry-ru
 
 ## Current Validation Results
 
-The system audit runs successfully. On this machine, it reports:
+The compatibility environment now exists and the system audit runs inside it. The latest report is:
 
 ```text
-Python: /pub3/neel/pyenv/bin/python
-Python version: 3.12.3
-PyTorch: 2.9.0+cu128
+Python: /pub7/neel2/conda_envs/simtoolreal-py38/bin/python
+Python version: 3.8.20
+PyTorch: 2.4.1+cu121
 CUDA available: true
-CUDA arch list includes: sm_120
 GPUs: 2x NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition
 VRAM: about 97887 MiB per GPU
 ```
 
-That is good news for modern PyTorch on Blackwell. It is not yet good news for original SimToolReal, because the original repository depends on Isaac Gym Preview 4.
+The repo-local dependency state is materially better than the original broken shell:
 
-The same report shows the current blocker:
+```text
+tyro: installed
+rl_games.torch_runner: import OK from the repo-local fork
+pretrained_policy/config.yaml: present
+pretrained_policy/model.pth: present
+```
+
+The pretrained checkpoint was downloaded successfully through the wrapper, and the checkpoint directory is ignored so it does not end up in Git.
+
+The remaining blocker is specific:
 
 ```text
 isaacgym: ModuleNotFoundError
 isaaclab: ModuleNotFoundError
 omni.isaac.lab: ModuleNotFoundError
-rl_games.torch_runner: ModuleNotFoundError
 ```
 
-The smoke scripts behave correctly in this blocked environment:
+There is also an important Blackwell warning:
 
 ```text
-download_assets: failed early because tyro is missing
-pretrained eval: failed early because pretrained_policy/config.yaml is missing
-DexToolBench eval: failed early because isaacgym is missing
-scratch smoke: failed early because isaacgym is missing
-finetune smoke: failed early because pretrained_policy/model.pth is missing
+torch CUDA arch list: sm_50, sm_60, sm_70, sm_75, sm_80, sm_86, sm_90
+GPU capability: sm_120
 ```
 
-Those failures are now recorded in the experiment result table. They are not lost in terminal scrollback.
+So the project is no longer blocked by the wrong Python version, missing `tyro`, missing pretrained policy files, or the local `rl_games` fork. It is blocked by the external Isaac Gym package not being installed, and possibly by the lack of Blackwell support in the Python 3.8 torch wheel once execution reaches GPU kernels.
+
+The smoke scripts behave correctly in this updated environment:
+
+```text
+download_assets: success
+validate_compat_env: dependency_error, missing isaacgym
+pretrained eval: dependency_error, missing isaacgym
+DexToolBench eval: dependency_error, missing isaacgym
+scratch smoke: dependency_error, missing isaacgym
+finetune smoke: dependency_error, missing isaacgym
+```
+
+Those outcomes are recorded in the experiment result table. They are not lost in terminal scrollback, and failed runs are not silently dropped.
 
 ## GPU Scaling Harness
 
@@ -179,25 +213,22 @@ That discipline is especially important for GPU scaling. Larger `num_envs` is no
 
 ## Next Step
 
-The correct next milestone is a compatibility environment path for original SimToolReal:
-
-```text
-Python 3.8
-Isaac Gym Preview 4
-repo-local rl_games fork
-tyro and project dependencies
-bounded smoke validation
-```
-
-Once that environment imports `isaacgym` and `rl_games.torch_runner`, the same scripts can be rerun:
+The correct next milestone is to install Isaac Gym Preview 4 into the compatibility environment and rerun the same smoke tests:
 
 ```bash
-python scripts/check_system.py
-bash scripts/download_assets.sh
-bash scripts/run_pretrained_eval.sh
-bash scripts/run_dextoolbench_eval.sh
-SMOKE_TEST=1 NUM_ENVS=768 NUM_BLOCKS=6 MAX_EPOCHS=1 bash scripts/train_scratch_smoke.sh
-SMOKE_TEST=1 NUM_ENVS=768 NUM_BLOCKS=6 MAX_EPOCHS=1 bash scripts/finetune_smoke.sh
+export ISAAC_GYM_ROOT=/path/to/extracted/isaacgym
+bash scripts/create_compat_env.sh
+bash scripts/validate_compat_env.sh
+```
+
+Once that environment imports `isaacgym`, the same scripts can be rerun:
+
+```bash
+bash scripts/run_in_compat_env.sh python scripts/check_system.py
+bash scripts/run_in_compat_env.sh bash scripts/run_pretrained_eval.sh
+bash scripts/run_in_compat_env.sh bash scripts/run_dextoolbench_eval.sh
+bash scripts/run_in_compat_env.sh bash scripts/train_scratch_smoke.sh
+bash scripts/run_in_compat_env.sh bash scripts/finetune_smoke.sh
 ```
 
 If Isaac Gym fails on Blackwell, that will become a precise compatibility report with exact logs. If it works, then the repo is ready for real single-GPU smoke training, followed by independent GPU0 and GPU1 scaling sweeps.
@@ -206,6 +237,6 @@ If Isaac Gym fails on Blackwell, that will become a precise compatibility report
 
 This phase turned SimToolReal from a cloned research repo into an auditable experiment workflow.
 
-The project now has system diagnostics, safe reproduction scripts, independent GPU launch wrappers, dry-run scaling sweeps, structured JSON/CSV result aggregation, best-run reproduction documentation, and clear blocker tracking. The original training stack is still blocked in the current shell by missing Isaac Gym and related dependencies, but the debugging surface is now clean.
+The project now has system diagnostics, a Python 3.8 compatibility environment builder, safe reproduction scripts, independent GPU launch wrappers, dry-run scaling sweeps, structured JSON/CSV result aggregation, best-run reproduction documentation, pretrained policy asset handling, and clear blocker tracking. The original training stack is still blocked by missing Isaac Gym and a possible Blackwell/PyTorch runtime mismatch, but the debugging surface is now concrete instead of ambiguous.
 
 Before asking how far two 96 GB Blackwell GPUs can scale SimToolReal, the repository now asks a better question: can we prove exactly what ran, where it ran, and what happened?

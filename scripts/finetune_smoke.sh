@@ -47,7 +47,7 @@ fi
 
 for module in isaacgym torch rl_games.torch_runner hydra omegaconf; do
   if ! require_python_module "${module}"; then
-    message="Missing dependency: ${module}. Activate the Isaac Gym SimToolReal environment first."
+    message="Missing dependency: ${module}. Run bash scripts/create_compat_env.sh with ISAAC_GYM_ROOT pointing at Isaac Gym Preview 4, then rerun through scripts/run_in_compat_env.sh."
     echo "${message}" | tee "${log_path}" >&2
     extra_json="{\"gpu_id\":${GPU_ID},\"num_envs\":${NUM_ENVS},\"num_blocks\":${NUM_BLOCKS},\"sapg_block_size\":$((NUM_ENVS / NUM_BLOCKS)),\"max_epochs\":${MAX_EPOCHS},\"seed\":${SEED},\"mode\":\"finetune\",\"checkpoint_path\":\"${CHECKPOINT_PATH}\",\"smoke_test\":\"${SMOKE_TEST}\"}"
     write_json_report "${report_path}" "dependency_error" 1 "${message}" "bash scripts/finetune_smoke.sh" "${log_path}" "${started_at}" "$(simtoolreal_timestamp)" "${extra_json}"

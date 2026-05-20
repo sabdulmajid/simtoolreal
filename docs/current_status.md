@@ -1,83 +1,74 @@
 # Current Status
 
-Last validated from this workspace on 2026-05-19T00:31Z.
+Last validated from this workspace on 2026-05-20T05:53Z.
 
-## What Works
+## What Works Now
 
-- Repository inspection completed without changing RL or environment logic.
-- `scripts/check_system.py` runs and writes `reports/system_check.json`.
-- GPU discovery works through PyTorch and `nvidia-smi`.
-- Both GPUs are visible as NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, about 97887 MiB each, compute capability `sm_120`.
-- Safe wrapper scripts exist for asset download, pretrained eval, DexToolBench eval, scratch smoke, finetune smoke, independent GPU launch, env-count sweep, and profile dry-runs.
-- Experiment wrappers append structured rows to `reports/experiment_runs.jsonl` and regenerate `reports/experiment_results.csv`, `reports/experiment_results.json`, and `reports/experiment_summary.md`.
-- GPU scaling dry-run command generation works for 12288 envs through `scripts/profile_gpu_scaling.py`.
-- GPU1 sweep dry-run command generation prints 12288, 24576, and 49152 env commands with `num_blocks=6`.
+- `scripts/create_compat_env.sh` creates or reuses a repo-compatible Python 3.8 environment at `/pub7/neel2/conda_envs/simtoolreal-py38`.
+- The compatibility environment uses Python 3.8.20 and torch 2.4.1+cu121.
+- The repo and repo-local `rl_games` fork install editable into that environment.
+- `rl_games.torch_runner` imports from `rl_games/rl_games/torch_runner.py`.
+- `tyro`, Hydra, OmegaConf, gym, W&B, TensorBoard, OpenCV, tqdm, requests, and the smoke wrapper dependencies are installed.
+- `scripts/check_system.py` runs inside the compatibility environment and writes `reports/system_check.json`.
+- `scripts/download_assets.sh` successfully downloaded the pretrained policy.
+- `pretrained_policy/config.yaml` and `pretrained_policy/model.pth` exist locally.
+- The pretrained policy directory is ignored by Git, so the 395 MB checkpoint should not be committed.
+- The experiment ledger and aggregator record setup, asset download, dry-runs, and failures without dropping failed runs.
+- The aggregate summary now refuses to report a "best run" until a measured evaluation, training, or profile run succeeds.
 
-## What Fails In The Current Shell
+## What Is Still Blocked
 
-- `isaacgym` does not import.
-- `isaaclab` and `omni.isaac.lab` do not import in this shell.
-- `rl_games.torch_runner` does not import because the repo-local `rl_games` fork is not installed into the active environment.
-- `tyro` is missing, so asset download wrappers cannot run in this shell.
-- `uv` and `python3.8` are not on `PATH` in this shell.
-- Pretrained policy files are missing: `pretrained_policy/config.yaml` and `pretrained_policy/model.pth`.
-- DexToolBench data is missing: `dextoolbench/data/`.
-- Pretrained eval, DexToolBench eval, scratch training, and finetuning have not started successfully in this shell.
+- `isaacgym` does not import in the Python 3.8 compatibility environment.
+- Isaac Gym Preview 4 was not found under the searched local paths and was not installed because `ISAAC_GYM_ROOT` is unset.
+- Torch 2.4.1+cu121 in the Python 3.8 environment reports CUDA arch support through `sm_90`; the GPUs are Blackwell `sm_120`.
+- Isaac Lab does not import in this compatibility environment. That is expected and is not the current target.
+- DexToolBench data is still missing under `dextoolbench/data/`.
+- Pretrained evaluation, DexToolBench evaluation, scratch smoke, and finetune smoke all stop at the missing `isaacgym` dependency before training or simulation starts.
+- No real SimToolReal throughput, reward, FPS, peak run VRAM, or largest stable `num_envs` has been measured yet.
 
-## Evidence
+## Current Evidence
 
 - System report: `reports/system_check.json`
+- Compatibility env creation report: `reports/create_compat_env.json`
+- Compatibility env validation report: `reports/validate_compat_env.json`
 - Asset download report: `reports/download_assets.json`
 - Pretrained eval report: `reports/run_pretrained_eval.json`
 - DexToolBench eval report: `reports/run_dextoolbench_eval.json`
 - Scratch smoke report: `reports/train_scratch_smoke.json`
 - Finetune smoke report: `reports/finetune_smoke.json`
-- GPU scaling dry-run JSON: `reports/gpu_scaling_results.json`
-- GPU scaling dry-run CSV: `reports/gpu_scaling_results.csv`
-- GPU scaling dry-run summary: `reports/gpu_scaling_summary.md`
-- Experiment result CSV: `reports/experiment_results.csv`
-- Experiment result JSON: `reports/experiment_results.json`
+- Experiment ledger: `reports/experiment_runs.jsonl`
+- Experiment CSV: `reports/experiment_results.csv`
+- Experiment JSON: `reports/experiment_results.json`
 - Experiment summary: `reports/experiment_summary.md`
-- Experiment discipline docs: `docs/experiment_discipline.md`
 
-Logs from the latest validation run:
+Latest relevant logs:
 
-- `logs/download_assets_20260519T002947Z.log`
-- `logs/run_pretrained_eval_20260519T002953Z.log`
-- `logs/run_dextoolbench_eval_20260519T003001Z.log`
-- `logs/train_scratch_smoke_20260519T003016Z.log`
-- `logs/finetune_smoke_20260519T003028Z.log`
-- `logs/sweep_num_envs_12288_gpu1_20260519T003048Z.log`
-- `logs/sweep_num_envs_24576_gpu1_20260519T003050Z.log`
-- `logs/sweep_num_envs_49152_gpu1_20260519T003052Z.log`
+- `logs/create_compat_env_20260520T055316Z.log`
+- `logs/validate_compat_env_20260520T055343Z.log`
+- `logs/download_assets_20260520T054540Z.log`
+- `logs/run_pretrained_eval_20260520T055638Z.log`
+- `logs/run_dextoolbench_eval_20260520T055638Z.log`
+- `logs/train_scratch_smoke_20260520T055638Z.log`
+- `logs/finetune_smoke_20260520T055638Z.log`
 
 ## Current Best Command
 
-The only validated command in the current shell is:
+Use the compatibility environment wrapper:
 
 ```bash
-python scripts/check_system.py
+bash scripts/run_in_compat_env.sh python scripts/check_system.py
 ```
 
-The next productive command is to create and activate the documented Python 3.8 Isaac Gym environment, then rerun the system check.
+Expected current result: Python 3.8, torch 2.4.1+cu121, two Blackwell GPUs visible, repo-local `rl_games` import OK, pretrained policy files present, `isaacgym` import failed.
 
-Focused debug update: the first hard failure is `python -c 'import isaacgym'`, which fails with `ModuleNotFoundError`. This is an external environment/install blocker, not an RL algorithm, Hydra config, headless rendering, asset path, or training runtime failure.
+## Next Required External Action
 
-Verification command after environment repair:
+Install Isaac Gym Preview 4 into the compatibility environment, using a local extracted Isaac Gym package:
 
 ```bash
-python -c 'import isaacgym; print(isaacgym.__file__)'
+export ISAAC_GYM_ROOT=/path/to/isaacgym
+bash scripts/create_compat_env.sh
+bash scripts/validate_compat_env.sh
 ```
 
-## Current Largest Stable `num_envs`
-
-No training smoke test has started in this shell. Largest stable `num_envs` is therefore unknown. The scaling harness has only dry-run evidence: `scripts/profile_gpu_scaling.py` wrote a 12288-env dry-run report, and `scripts/sweep_num_envs.sh` printed GPU1 dry-run commands for 12288, 24576, and 49152 envs.
-
-## Evaluation And Training Status
-
-- Pretrained eval works: no, blocked by missing pretrained files and missing Isaac Gym environment.
-- DexToolBench eval works: no, blocked by missing Isaac Gym environment and assets.
-- Scratch training starts: no, blocked by missing Isaac Gym environment.
-- Finetuning starts: no, blocked by missing checkpoint and missing Isaac Gym environment.
-- True multi-GPU distributed training: unverified and not claimed.
-- Isaac Lab support: unverified and not claimed.
+The blocker is fixed only when `reports/system_check.json` shows `Isaac Gym.import_ok == true`.

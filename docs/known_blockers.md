@@ -1,98 +1,92 @@
 # Known Blockers
 
-## Current Environment Is Not The SimToolReal Isaac Gym Environment
-
-Evidence: `reports/system_check.json`
-
-- Current Python: `/pub3/neel/pyenv/bin/python`, version 3.12.3.
-- Documented SimToolReal training environment requires Python 3.8 for Isaac Gym Preview 4.
-- `isaacgym` import fails with `ModuleNotFoundError`.
-- `rl_games.torch_runner` import fails with `ModuleNotFoundError`.
-- `tyro` is missing, blocking repo CLI wrappers such as asset download and `launch_training.py`.
-
-Focused debug classification:
-
-- Failing command: `python -c 'import isaacgym'`
-- Error summary: `ModuleNotFoundError: No module named 'isaacgym'`
-- Relevant log paths: `reports/system_check.json`, `logs/train_scratch_smoke_20260519T003016Z.log`, `logs/run_dextoolbench_eval_20260519T003001Z.log`
-- Likely root cause: active shell is not the documented SimToolReal Python 3.8 + Isaac Gym Preview 4 environment.
-- Category: missing dependency, Python version mismatch, Isaac Gym install issue.
-- Not yet proven: PyTorch/CUDA mismatch, Blackwell GPU compatibility issue, Hydra/config issue, headless/rendering issue, or training/runtime issue. Execution does not get far enough to test those.
-
-Local checks performed:
-
-```bash
-python --version
-which python
-python -c 'import isaacgym'
-python -c 'import tyro'
-command -v uv || true
-command -v python3.8 || true
-find /pub3/neel /pub7/neel2 -maxdepth 6 \( -type d -name 'isaacgym' -o -type f -name 'libPhysXGpu_64.so' -o -type d -name 'IsaacGym*' \) 2>/dev/null | head -100
-```
-
-Result:
-
-- Active Python is 3.12.3.
-- `uv` is not on `PATH`.
-- `python3.8` is not on `PATH`.
-- No local Isaac Gym package or `libPhysXGpu_64.so` was found in the searched repo/user paths.
-
-Regression verification after fixing the external environment:
-
-```bash
-python -c 'import isaacgym; print(isaacgym.__file__)'
-python -c 'import tyro, rl_games.torch_runner; print("deps ok")'
-python scripts/check_system.py
-```
-
-The blocker is fixed only when `reports/system_check.json` shows `Isaac Gym.import_ok == true` and `rl_games package.import_ok == true`.
-
-## Isaac Lab Is Not Importable In This Shell
-
-Evidence: `reports/system_check.json`
-
-- `isaaclab` import fails.
-- `omni.isaac.lab` import fails.
-- This does not prove Isaac Lab is absent from the machine; it proves the active shell does not have it on `PYTHONPATH` or in the active environment.
-
-## Missing Assets
+## 1. Isaac Gym Preview 4 Is Not Installed
 
 Evidence:
 
 - `reports/system_check.json`
-- `reports/run_pretrained_eval.json`
-- `reports/finetune_smoke.json`
+- `reports/validate_compat_env.json`
+- `logs/validate_compat_env_20260520T055343Z.log`
+- `logs/run_pretrained_eval_20260520T055638Z.log`
+- `logs/train_scratch_smoke_20260520T055638Z.log`
 
-Missing files:
+Failing command:
 
-- `pretrained_policy/config.yaml`
-- `pretrained_policy/model.pth`
-- `dextoolbench/data/`
+```bash
+bash scripts/validate_compat_env.sh
+```
 
-## Isaac Gym Preview 4 On Blackwell Is High Risk
+Error summary:
 
-The machine GPUs are Blackwell `sm_120`. Current PyTorch in this shell supports `sm_120`, but Isaac Gym Preview 4 is an older binary stack. The risk is that PhysX GPU binaries may not contain Blackwell-compatible cubins/PTX. This must be tested in the real Python 3.8 Isaac Gym environment.
+```text
+ModuleNotFoundError: No module named 'isaacgym'
+```
 
-Relevant references are listed in `docs/project_plan.md`.
+Current classification:
 
-## GUI And Headless Risks
+- Missing dependency: yes.
+- Python version mismatch: mostly fixed. The compatibility env is Python 3.8.20.
+- PyTorch/CUDA mismatch: possible remaining blocker, see below.
+- Isaac Gym install issue: yes.
+- Blackwell GPU compatibility issue: not yet proven for Isaac Gym because the package is absent.
+- Asset/path issue: pretrained policy fixed; DexToolBench data still missing.
+- Hydra/config issue: not reached.
+- rl_games issue: fixed in the compatibility env.
+- Headless/rendering issue: not reached.
+- Training/runtime issue: not reached.
 
-- Interactive evaluation uses a viser web UI.
-- Isaac Gym viewer and camera settings can affect performance and headless behavior.
-- Default wrappers prefer headless one-task evaluation; use `INTERACTIVE=1` only after the headless path works.
+Clean install path:
 
-## Hydra And Config Risks
+```bash
+export ISAAC_GYM_ROOT=/path/to/extracted/isaacgym
+bash scripts/create_compat_env.sh
+bash scripts/validate_compat_env.sh
+```
 
-- `launch_training.py` uses tyro for CLI parsing and Hydra overrides internally.
-- The profile/smoke scripts bypass `launch_training.py` only to set short-run `max_epochs`; they preserve the same SimToolReal task and SAPG/PPO override surface.
-- `num_envs` must remain divisible by `num_blocks` for SAPG block sizing.
+`scripts/create_compat_env.sh` installs Isaac Gym only when `${ISAAC_GYM_ROOT}/python` exists.
 
-## Unverified Assumptions
+## 2. Python 3.8 PyTorch Wheel Does Not Advertise Blackwell `sm_120`
 
-- No successful Isaac Gym environment creation has occurred in this shell.
-- No pretrained policy checkpoint has been loaded.
-- No DexToolBench episode has run.
-- No scratch or finetune training run has entered the first epoch.
-- No largest stable `num_envs` is known.
-- No true distributed multi-GPU codepath is verified.
+Evidence: `reports/system_check.json`
+
+The Python 3.8 compatibility environment currently has:
+
+```text
+torch: 2.4.1+cu121
+torch.version.cuda: 12.1
+torch CUDA arch list: sm_50, sm_60, sm_70, sm_75, sm_80, sm_86, sm_90
+GPU capability: sm_120
+```
+
+PyTorch emits this warning:
+
+```text
+NVIDIA RTX PRO 6000 Blackwell ... sm_120 is not compatible with the current PyTorch installation.
+```
+
+This means the environment is good enough to expose imports and dependency state, but may still fail when PyTorch kernels or Isaac Gym GPU physics execute on the Blackwell GPUs. The clean fix is a Python 3.8-compatible torch build with Blackwell support if one is available, or an isolated container/host path with a simulator stack verified against the installed driver.
+
+Do not claim training compatibility until a smoke environment actually launches and runs.
+
+## 3. DexToolBench Data Is Missing
+
+Evidence: `reports/system_check.json`
+
+Current state:
+
+```text
+dextoolbench/data/: missing
+```
+
+Download one task only after Isaac Gym imports:
+
+```bash
+bash scripts/run_in_compat_env.sh python download_dextoolbench_data.py \
+  --object-category hammer \
+  --object-name claw_hammer \
+  --task-name swing_down
+```
+
+## 4. Isaac Lab Is Out Of Scope For The Current Fix
+
+Isaac Lab does not import in the Python 3.8 compatibility environment. That does not matter for the current original-SimToolReal reproduction path. Do not start the Isaac Lab migration until the original Isaac Gym path is either working or proven impossible with exact logs.
