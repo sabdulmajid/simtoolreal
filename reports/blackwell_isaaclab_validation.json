@@ -1,0 +1,217 @@
+{
+  "app_error": null,
+  "command": "/pub7/neel/miniconda3/envs/isaaclab2/bin/python /pub7/neel2/simtoolreal/scripts/validate_blackwell_isaaclab.py --headless --device cuda:0 --gpu-id 0 --num-envs 16 --steps 16 --seed 42 --task Isaac-Cartpole-Direct-v0 --report-path reports/blackwell_isaaclab_validation.json",
+  "device": "cuda:0",
+  "ended_at_utc": "2026-05-20T09:26:15Z",
+  "exit_code": 0,
+  "gpu_id": "0",
+  "gpu_samples": {
+    "avg_gpu_util_percent": 38.5,
+    "peak_gpu_util_percent": 48,
+    "peak_vram_mib": 25392,
+    "sample_count": 8,
+    "samples": [
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 22516,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 22516, 44, 580.142",
+        "timestamp_utc": "2026-05-20T09:26:06Z",
+        "utilization_gpu_percent": 44
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 23120,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 23120, 48, 580.142",
+        "timestamp_utc": "2026-05-20T09:26:07Z",
+        "utilization_gpu_percent": 48
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 23258,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 23258, 37, 580.142",
+        "timestamp_utc": "2026-05-20T09:26:08Z",
+        "utilization_gpu_percent": 37
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 23262,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 23262, 36, 580.142",
+        "timestamp_utc": "2026-05-20T09:26:09Z",
+        "utilization_gpu_percent": 36
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 23262,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 23262, 35, 580.142",
+        "timestamp_utc": "2026-05-20T09:26:10Z",
+        "utilization_gpu_percent": 35
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 23294,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 23294, 34, 580.142",
+        "timestamp_utc": "2026-05-20T09:26:11Z",
+        "utilization_gpu_percent": 34
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 23324,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 23324, 32, 580.142",
+        "timestamp_utc": "2026-05-20T09:26:12Z",
+        "utilization_gpu_percent": 32
+      },
+      {
+        "driver_version": "580.142",
+        "index": "0",
+        "memory_total_mib": 97887,
+        "memory_used_mib": 25392,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 25392, 42, 580.142",
+        "timestamp_utc": "2026-05-20T09:26:13Z",
+        "utilization_gpu_percent": 42
+      }
+    ]
+  },
+  "imports": {
+    "gymnasium": {
+      "file": "/pub7/neel/miniconda3/envs/isaaclab2/lib/python3.11/site-packages/gymnasium/__init__.py",
+      "import_ok": true
+    },
+    "isaaclab": {
+      "file": "/pub7/neel/vlm/IsaacLab/source/isaaclab/isaaclab/__init__.py",
+      "import_ok": true
+    },
+    "isaaclab_tasks": {
+      "file": "/pub7/neel/vlm/IsaacLab/source/isaaclab_tasks/isaaclab_tasks/__init__.py",
+      "import_ok": true
+    },
+    "isaacsim": {
+      "file": "/pub7/neel/miniconda3/envs/isaaclab2/lib/python3.11/site-packages/isaacsim/__init__.py",
+      "import_ok": true
+    }
+  },
+  "message": "Isaac Lab simulation succeeded, but pip check reports dependency conflicts.",
+  "metrics": {
+    "avg_gpu_util_percent": 38.5,
+    "final_reward": 0.008275091648101807,
+    "peak_gpu_util_percent": 48,
+    "peak_vram_mib": 25392,
+    "throughput_fps": 1031.1245830277567
+  },
+  "mode": "blackwell_isaaclab_validation",
+  "num_envs": 16,
+  "nvidia_smi_before_after": {
+    "after": {
+      "driver_version": "580.142",
+      "index": "0",
+      "memory_total_mib": 97887,
+      "memory_used_mib": 25454,
+      "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "0, NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, 97887, 25454, 45, 580.142",
+      "utilization_gpu_percent": 45
+    }
+  },
+  "pip_check": {
+    "ok": false,
+    "returncode": 1,
+    "stderr": "",
+    "stdout": "openvla-oft 0.0.1 requires torchaudio, which is not installed.\nisaacsim-core 5.1.0.0 requires torchaudio, which is not installed.\nopenvla-oft 0.0.1 has requirement tokenizers==0.19.1, but you have tokenizers 0.22.2.\nopenvla-oft 0.0.1 has requirement torch==2.2.0, but you have torch 2.10.0+cu128.\nopenvla-oft 0.0.1 has requirement torchvision==0.17.0, but you have torchvision 0.25.0+cu128.\ntensorflow 2.15.0 has requirement ml-dtypes~=0.2.0, but you have ml-dtypes 0.5.4.\ndex-retargeting 0.5.0 has requirement lxml>=5.2.2, but you have lxml 4.9.4.\ndex-retargeting 0.5.0 has requirement numpy>=2.0.0, but you have numpy 1.26.4.\ncmeel-boost 1.89.0 has requirement numpy<2.4,>=2.3; python_version >= \"3.11.0\", but you have numpy 1.26.4.\nisaaclab 4.5.22 has requirement numpy>=2, but you have numpy 1.26.4.\nisaaclab 4.5.22 has requirement pillow==12.1.1, but you have pillow 11.3.0.\nwheel 0.46.3 has requirement packaging>=24.0, but you have packaging 23.2.\nnlopt 2.10.0 has requirement numpy<3,>=2, but you have numpy 1.26.4.\nisaaclab-tasks 1.5.11 has requirement numpy>=2, but you have numpy 1.26.4.\nhpp-fcl 2.4.4 has requirement cmeel-assimp<6,>=5.3.1, but you have cmeel-assimp 6.0.2.\nhpp-fcl 2.4.4 has requirement cmeel-boost~=1.83.0, but you have cmeel-boost 1.89.0.\nrerun-sdk 0.32.1 has requirement numpy>=2, but you have numpy 1.26.4.\nrerun-sdk 0.32.1 has requirement psutil>=7.0, but you have psutil 5.9.8.\nisaacsim-core 5.1.0.0 has requirement llvmlite==0.42.0, but you have llvmlite 0.47.0.\nisaacsim-core 5.1.0.0 has requirement numba==0.59.1, but you have numba 0.65.1.\nisaacsim-core 5.1.0.0 has requirement packaging==23.0, but you have packaging 23.2.\nisaacsim-core 5.1.0.0 has requirement torch==2.7.0, but you have torch 2.10.0+cu128.\nisaacsim-core 5.1.0.0 has requirement torchvision==0.22.0, but you have torchvision 0.25.0+cu128.\nisaacsim-kernel 5.1.0.0 has requirement aiohappyeyeballs==2.4.4, but you have aiohappyeyeballs 2.6.1.\nisaacsim-kernel 5.1.0.0 has requirement aiohttp==3.11.11, but you have aiohttp 3.13.3.\nisaacsim-kernel 5.1.0.0 has requirement aiosignal==1.3.2, but you have aiosignal 1.4.0.\nisaacsim-kernel 5.1.0.0 has requirement coverage==7.4.4, but you have coverage 7.6.1.\nisaacsim-kernel 5.1.0.0 has requirement numpy==1.26.0, but you have numpy 1.26.4.\nisaacsim-kernel 5.1.0.0 has requirement typing_extensions==4.12.2, but you have typing-extensions 4.15.0.\nisaacsim-kernel 5.1.0.0 has requirement websockets==12.0, but you have websockets 16.0.\nisaacsim-kernel 5.1.0.0 has requirement wrapt==1.16.0, but you have wrapt 1.14.2.\nfastapi 0.115.7 has requirement starlette<0.46.0,>=0.40.0, but you have starlette 0.49.1."
+  },
+  "seed": 42,
+  "simulation": {
+    "device": "cuda:0",
+    "elapsed_sec": 0.24827261827886105,
+    "env_device": "cuda:0",
+    "final_reward": 0.008275091648101807,
+    "num_envs": 16,
+    "seed": 42,
+    "steps": 16,
+    "success": true,
+    "task": "Isaac-Cartpole-Direct-v0",
+    "throughput_fps": 1031.1245830277567
+  },
+  "smoke_test": true,
+  "started_at_utc": "2026-05-20T09:26:06Z",
+  "status": "success_with_dependency_conflicts",
+  "steps": 16,
+  "system": {
+    "cuda_visible_devices": "0",
+    "environment_name": "isaaclab2",
+    "git": {
+      "commit": "bf65fb09d360a307b06bdd32267fde5fbe07b0a6",
+      "dirty": true,
+      "status_short": "M reports/experiment_results.csv\n M reports/experiment_results.json\n M reports/experiment_runs.jsonl\n M reports/experiment_summary.md\n M scripts/aggregate_results.py\n M scripts/record_experiment.py\n?? reports/blackwell_isaaclab_smoke.json\n?? reports/blackwell_isaaclab_smoke_vlm.json\n?? reports/blackwell_isaaclab_validation.json\n?? scripts/run_blackwell_isaaclab_smoke.sh\n?? scripts/validate_blackwell_isaaclab.py\n?? simtoolreal_reproduction_gpu_goal.md"
+    },
+    "platform": "Linux-6.8.0-87-generic-x86_64-with-glibc2.39",
+    "python_executable": "/pub7/neel/miniconda3/envs/isaaclab2/bin/python",
+    "python_version": "3.11.14"
+  },
+  "task": "Isaac-Cartpole-Direct-v0",
+  "torch": {
+    "cuda_arch_list": [
+      "sm_70",
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "cuda_available": true,
+    "cuda_device_count": 1,
+    "cuda_version": "12.8",
+    "device": "cuda:0",
+    "devices": [
+      {
+        "compute_capability": "sm_120",
+        "index": 0,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+        "total_vram_mib": 97247
+      }
+    ],
+    "file": "/pub7/neel/miniconda3/envs/isaaclab2/lib/python3.11/site-packages/torch/__init__.py",
+    "import_ok": true,
+    "kernel_smoke_ok": true,
+    "kernel_smoke_result": 2048.0,
+    "version": "2.10.0+cu128"
+  }
+}

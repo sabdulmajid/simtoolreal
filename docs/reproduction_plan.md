@@ -204,6 +204,29 @@ git rev-parse HEAD | tee train_dir/git_commit.txt
 git status --short | tee train_dir/git_status.txt
 ```
 
+## 9. Blackwell Isaac Lab Compatibility Smoke
+
+The original Isaac Gym path above is blocked on this Blackwell machine until a
+Python 3.8 torch build with `sm_120` kernels exists. The current forward path is
+to validate Isaac Lab separately before porting the minimal environment:
+
+```bash
+bash scripts/run_blackwell_isaaclab_smoke.sh
+```
+
+GPU 1:
+
+```bash
+GPU_ID=1 \
+REPORT_PATH=reports/blackwell_isaaclab_smoke_gpu1.json \
+METRICS_PATH=reports/blackwell_isaaclab_validation_gpu1.json \
+bash scripts/run_blackwell_isaaclab_smoke.sh
+```
+
+Current result in this workspace: both GPUs complete the bounded Isaac Lab
+Cartpole smoke test, but the active `isaaclab2` environment has dependency
+conflicts, so the result is recorded as `success_with_dependency_conflicts`.
+
 ## Current Evidence From This Shell
 
 - System report: `reports/system_check.json`
@@ -218,6 +241,8 @@ git status --short | tee train_dir/git_status.txt
 - Aggregated result table: `reports/experiment_results.csv`
 - Aggregated result JSON: `reports/experiment_results.json`
 - Best-run summary: `reports/experiment_summary.md`
+- Blackwell Isaac Lab GPU0 report: `reports/blackwell_isaaclab_smoke.json`
+- Blackwell Isaac Lab GPU1 report: `reports/blackwell_isaaclab_smoke_gpu1.json`
 
 These reports currently show that the Python 3.8 dependency stack, Isaac Gym Preview 4, repo-local `rl_games`, and pretrained checkpoint are in place. Original SimToolReal execution remains blocked because torch 2.4.1+cu124 does not run CUDA kernels on the installed Blackwell `sm_120` GPUs.
 

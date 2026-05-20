@@ -118,6 +118,8 @@ def repair_row(row: Dict[str, Any]) -> Dict[str, Any]:
             row["mode"] = "environment_setup"
         elif "validate_compat_env" in source:
             row["mode"] = "environment_validation"
+        elif "blackwell_isaaclab" in source:
+            row["mode"] = "blackwell_isaaclab_validation"
         elif "download_isaacgym" in source:
             row["mode"] = "isaacgym_download"
         elif "pretrained" in source:
@@ -137,7 +139,7 @@ def repair_row(row: Dict[str, Any]) -> Dict[str, Any]:
         or "CUDA kernel fails" in message
     ):
         row["status"] = "gpu_runtime_error"
-    if row.get("status") != "success":
+    if not str(row.get("status") or "").startswith("success"):
         row["final_metric"] = None
         row["final_reward"] = None
         row["final_loss"] = None
@@ -186,6 +188,14 @@ def best_row(rows: Iterable[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     return candidates[-1] if candidates else None
 
 
+def is_failure_status(status: Any) -> bool:
+    status_text = str(status or "unknown")
+    return not (
+        status_text.startswith("success")
+        or status_text in ("dry_run", "skipped")
+    )
+
+
 def format_value(value: Any) -> str:
     if value is None:
         return ""
@@ -205,7 +215,7 @@ def write_summary(rows: List[Dict[str, Any]], path: Path) -> None:
     latest_failures = [
         row
         for row in reversed(rows)
-        if row.get("status") not in ("success", "dry_run", "skipped")
+        if is_failure_status(row.get("status"))
     ][:5]
 
     lines = [

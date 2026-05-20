@@ -48,6 +48,7 @@ SMOKE_TEST=1 bash scripts/run_pretrained_eval.sh
 SMOKE_TEST=1 NUM_ENVS=768 NUM_BLOCKS=6 MAX_EPOCHS=1 bash scripts/train_scratch_smoke.sh
 SMOKE_TEST=1 NUM_ENVS=768 NUM_BLOCKS=6 MAX_EPOCHS=1 bash scripts/finetune_smoke.sh
 python scripts/profile_gpu_scaling.py --gpu-id 0 --num-envs 12288 --smoke-test
+bash scripts/run_blackwell_isaaclab_smoke.sh
 ```
 
 In the current shell, these commands are expected to fail before Isaac Gym

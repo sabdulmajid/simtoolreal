@@ -166,6 +166,8 @@ def infer_mode(report: Dict[str, Any], source: str, command: str) -> Optional[st
         return "environment_setup"
     if "validate_compat_env" in source:
         return "environment_validation"
+    if "blackwell_isaaclab" in source:
+        return "blackwell_isaaclab_validation"
     if "download_isaacgym" in source:
         return "isaacgym_download"
     if "pretrained" in source:

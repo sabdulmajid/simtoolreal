@@ -1,6 +1,6 @@
 # Current Status
 
-Last validated from this workspace on 2026-05-20T06:41Z.
+Last validated from this workspace on 2026-05-20T09:27Z.
 
 ## What Works Now
 
@@ -18,6 +18,9 @@ Last validated from this workspace on 2026-05-20T06:41Z.
 - The experiment ledger and aggregator record setup, Isaac Gym download, asset download, dry-runs, and failures without dropping failed runs.
 - The aggregate summary now refuses to report a "best run" until a measured evaluation, training, or profile run succeeds.
 - Pretrained evaluation, DexToolBench evaluation, scratch smoke, and finetune smoke now reach CUDA execution rather than stopping at missing imports.
+- A bounded Isaac Lab Cartpole smoke test runs on both Blackwell GPUs through `scripts/run_blackwell_isaaclab_smoke.sh`.
+- The modern Isaac Lab smoke path uses Python 3.11.14 and torch 2.10.0+cu128, whose CUDA arch list includes `sm_120`.
+- GPU 0 and GPU 1 each completed a 16-env, 16-step Isaac Lab smoke test with structured reports.
 
 ## What Is Still Blocked
 
@@ -27,6 +30,8 @@ Last validated from this workspace on 2026-05-20T06:41Z.
 - Isaac Lab does not import in this compatibility environment. That is expected and is not the current target.
 - DexToolBench data is still missing under `dextoolbench/data/`.
 - No real SimToolReal throughput, reward, FPS, peak run VRAM, or largest stable `num_envs` has been measured yet.
+- The current `isaaclab2` environment is not dependency-clean; `pip check` reports conflicts. The Isaac Lab smoke result is therefore recorded as `success_with_dependency_conflicts`, not a clean reproducibility pass.
+- The `/pub7/neel2/isaaclab_ws/IsaacLab` checkout fails before simulation because its app launcher expects a missing `apps/isaacsim_5` layout. The working smoke path currently uses `/pub7/neel/vlm/IsaacLab`.
 
 ## Current Evidence
 
@@ -43,6 +48,11 @@ Last validated from this workspace on 2026-05-20T06:41Z.
 - Experiment CSV: `reports/experiment_results.csv`
 - Experiment JSON: `reports/experiment_results.json`
 - Experiment summary: `reports/experiment_summary.md`
+- Blackwell Isaac Lab GPU0 report: `reports/blackwell_isaaclab_smoke.json`
+- Blackwell Isaac Lab GPU0 metrics: `reports/blackwell_isaaclab_validation.json`
+- Blackwell Isaac Lab GPU1 report: `reports/blackwell_isaaclab_smoke_gpu1.json`
+- Blackwell Isaac Lab GPU1 metrics: `reports/blackwell_isaaclab_validation_gpu1.json`
+- Blackwell Isaac Lab path notes: `docs/blackwell_isaaclab_path.md`
 
 Latest relevant logs:
 
@@ -54,6 +64,8 @@ Latest relevant logs:
 - `logs/run_dextoolbench_eval_20260520T063906Z.log`
 - `logs/train_scratch_smoke_20260520T063928Z.log`
 - `logs/finetune_smoke_20260520T063948Z.log`
+- `logs/blackwell_isaaclab_smoke_20260520T092605Z.log`
+- `logs/blackwell_isaaclab_smoke_20260520T092646Z.log`
 
 ## Current Best Command
 
@@ -75,4 +87,4 @@ Python 3.8 PyTorch wheels available here stop at torch 2.4.1.
 torch 2.4.1+cu121 and torch 2.4.1+cu124 do not advertise sm_120 and fail CUDA kernels on the installed Blackwell GPUs.
 ```
 
-The clean next milestone is a compatibility decision, not more scaling: either run the original Isaac Gym stack on a non-Blackwell GPU, build or locate a Python 3.8 torch package with Blackwell kernel support, or move to an Isaac Lab port under a modern Python/PyTorch stack.
+The clean next milestone is no longer more original-stack scaling. Original Isaac Gym on Blackwell remains blocked, while the modern Isaac Lab smoke path works with caveats. Proceed by building a clean Isaac Lab compatibility environment and then porting only the minimal ToolPose tracking environment.

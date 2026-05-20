@@ -106,4 +106,21 @@ bash scripts/run_in_compat_env.sh python download_dextoolbench_data.py \
 
 ## 4. Isaac Lab Is Out Of Scope For The Current Fix
 
-Isaac Lab does not import in the Python 3.8 compatibility environment. That does not matter for the current original-SimToolReal reproduction path. Do not start the Isaac Lab migration until the original Isaac Gym path is either working or proven impossible with exact logs.
+Isaac Lab does not import in the Python 3.8 compatibility environment. That does not matter for the original Isaac Gym reproduction path.
+
+The Blackwell path is now partially validated under a modern Python/PyTorch environment:
+
+- `reports/blackwell_isaaclab_smoke.json`
+- `reports/blackwell_isaaclab_validation.json`
+- `reports/blackwell_isaaclab_smoke_gpu1.json`
+- `reports/blackwell_isaaclab_validation_gpu1.json`
+
+Current status:
+
+- Isaac Lab Cartpole smoke runs on both GPUs.
+- torch 2.10.0+cu128 advertises `sm_120`.
+- a minimal torch CUDA kernel succeeds.
+- `pip check` fails, so the active `isaaclab2` environment is not a clean reproducibility environment.
+- `/pub7/neel2/isaaclab_ws/IsaacLab` fails due a missing `apps/isaacsim_5` layout; the working launcher path is `/pub7/neel/vlm/IsaacLab`.
+
+This means the project is not a dead end, but the fix is a clean Isaac Lab path plus a scoped environment port. It is not more Isaac Gym scaling on Blackwell.

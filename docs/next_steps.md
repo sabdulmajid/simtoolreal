@@ -55,11 +55,41 @@ Python 3.8 PyTorch wheels available here stop at torch 2.4.1.
 torch 2.4.1+cu121 and torch 2.4.1+cu124 do not advertise sm_120 and fail CUDA kernels on Blackwell.
 ```
 
-Choose one path before further scaling:
+The chosen path is Isaac Lab for Blackwell. The evidence is now:
 
-- Original Isaac Gym on non-Blackwell GPU: quickest way to reproduce the old stack if another GPU is available.
-- Original Isaac Gym on Blackwell with a custom Python 3.8 torch build: preserves the repo stack, but may require source builds and careful ABI testing.
-- Scoped Isaac Lab migration: likely the clean Blackwell path, but it is a simulator migration and should not be described as original Isaac Gym reproduction.
+- original Isaac Gym smoke commands reach CUDA and fail on `sm_120`;
+- Isaac Lab Cartpole smoke runs on GPU 0 and GPU 1 with torch 2.10.0+cu128;
+- the active Isaac Lab environment still has dependency conflicts.
+
+Do not spend more time scaling the original Isaac Gym stack on this Blackwell
+machine.
+
+## Immediate Isaac Lab Commands
+
+Validate GPU 0:
+
+```bash
+bash scripts/run_blackwell_isaaclab_smoke.sh
+```
+
+Validate GPU 1:
+
+```bash
+GPU_ID=1 \
+REPORT_PATH=reports/blackwell_isaaclab_smoke_gpu1.json \
+METRICS_PATH=reports/blackwell_isaaclab_validation_gpu1.json \
+bash scripts/run_blackwell_isaaclab_smoke.sh
+```
+
+Expected current result: `success_with_dependency_conflicts`. This means the
+simulator and CUDA smoke worked, but the active environment is not clean enough
+to be the final reproducible environment.
+
+## Next Milestone
+
+Build a clean Isaac Lab compatibility environment, rerun the two smoke commands,
+and only then begin a scoped port of the minimal ToolPose tracking environment.
+Do not port the full repo yet.
 
 ## If A Blackwell-Capable Python 3.8 Torch Build Is Installed
 
@@ -72,7 +102,9 @@ GPU_ID=0 NUM_ENVS=128 NUM_BLOCKS=1 MAX_EPOCHS=1 \
   bash scripts/run_in_compat_env.sh bash scripts/train_scratch_smoke.sh
 ```
 
-Only then rerun evaluation and finetuning smoke tests.
+Only then rerun evaluation and finetuning smoke tests. This remains a fallback
+path for original Isaac Gym reproduction on compatible hardware, not the
+recommended Blackwell path.
 
 ## When To Scale
 

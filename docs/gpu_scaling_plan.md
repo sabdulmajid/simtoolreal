@@ -117,4 +117,11 @@ Filling VRAM is not the goal. The useful optimization target is stable environme
 
 ## Current Status
 
-Do not run real scaling yet. Isaac Gym Preview 4 now imports, but torch 2.4.1+cu124 cannot run CUDA kernels on the installed Blackwell `sm_120` GPUs. The latest validation report is `reports/validate_compat_env.json` with `status: gpu_runtime_error`.
+Do not run real Isaac Gym scaling on this Blackwell machine. Isaac Gym Preview 4 now imports, but torch 2.4.1+cu124 cannot run CUDA kernels on the installed Blackwell `sm_120` GPUs. The latest original-stack validation report is `reports/validate_compat_env.json` with `status: gpu_runtime_error`.
+
+A bounded Isaac Lab smoke path now runs on both GPUs:
+
+- GPU 0: `reports/blackwell_isaaclab_smoke.json`
+- GPU 1: `reports/blackwell_isaaclab_smoke_gpu1.json`
+
+Those results are recorded as `success_with_dependency_conflicts`, so the next scaling prerequisite is a clean Isaac Lab environment, not larger Isaac Gym sweeps.
